@@ -33,6 +33,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/database ./database
 COPY --from=builder --chown=nextjs:nodejs /app/.sequelizerc ./.sequelizerc
 COPY --from=builder --chown=nextjs:nodejs /app/entrypoint.sh ./entrypoint.sh
 
+# Bright Data terminates TLS on port 44445 and presents its own certificate, so
+# the proxy scraper cannot verify google.com against the public roots. Shipping
+# their root CA lets NODE_EXTRA_CA_CERTS=/app/certs/brightdata_root_ca_44445.crt
+# trust that one issuer instead of turning verification off process-wide with
+# NODE_TLS_REJECT_UNAUTHORIZED=0. Unused when no proxy scraper is configured.
+COPY --from=builder --chown=nextjs:nodejs /app/certs ./certs
+
 # Install packages needed at runtime that are NOT reliably traced
 # into the standalone node_modules by Next.js:
 # - croner, cryptr, dotenv: used by cron.js (runs outside Next.js)
