@@ -1,3 +1,5 @@
+import countries from '../../utils/countries';
+
 interface BrightDataOrganicResult {
    title?: string,
    link?: string,
@@ -32,6 +34,17 @@ const GOOGLE_DOMAINS: Record<string, string> = {
    US: 'google.com',
 };
 
+/**
+ * Google's `hl` is a LANGUAGE code, not a country one.
+ *
+ * Passing the country through worked by accident for FR/DE/ES/IT/PT, where the
+ * two codes coincide, and broke every English-speaking market: Bright Data
+ * answered HTTP 200 with "the inputted language value (hl parameter) is not
+ * allowed" for hl=gb and hl=us, so the .com domain measured nothing at all.
+ * countries[code][2] is the language, and is what the other scrapers read.
+ */
+const languageOf = (country: string): string => countries[country]?.[2] || 'en';
+
 const brightdata: ScraperSettings = {
    id: 'brightdata',
    name: 'Bright Data (SERP API)',
@@ -52,7 +65,7 @@ const brightdata: ScraperSettings = {
       const parametres = [
          `q=${encodeURIComponent(keyword.keyword)}`,
          `gl=${country.toLowerCase()}`,
-         `hl=${country.toLowerCase()}`,
+         `hl=${languageOf(country)}`,
          start ? `start=${start}` : '',
          keyword.device === 'mobile' ? 'brd_mobile=1' : '',
          'brd_json=1',

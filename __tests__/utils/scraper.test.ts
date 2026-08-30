@@ -1,5 +1,6 @@
 import { readScraperResponse, scrapeKeywordWithStrategy } from '../../utils/scraper';
 import { dummyKeywords, dummySettings } from '../../__mocks__/data';
+import brightdata from '../../scrapers/services/brightdata';
 
 const response = (body: string, headers: Record<string, string> = {}, status = 200) => ({
    status,
@@ -107,5 +108,38 @@ describe('failure messages carry their cause', () => {
       await jest.advanceTimersByTimeAsync(10000);
       const result = await promise;
       expect((result as any).error).toMatch(/No search results found/);
+   });
+});
+
+describe('brightdata request', () => {
+   const body = (country: string) => brightdata.body?.(
+      { ...dummyKeywords[0], country } as any,
+      { ...dummySettings, scaping_api: 'token' } as any,
+      { start: 0, num: 10, page: 1 },
+   ) as any;
+
+   it('sends the LANGUAGE in hl, not the country', () => {
+      // hl=gb and hl=us were rejected by Bright Data with HTTP 200 and
+      // "the inputted language value (hl parameter) is not allowed".
+      expect(body('GB').url).toContain('hl=en');
+      expect(body('US').url).toContain('hl=en');
+      expect(body('GB').url).not.toContain('hl=gb');
+   });
+
+   it('still sends the country in gl and follows the national Google', () => {
+      expect(body('GB').url).toContain('gl=gb');
+      expect(body('GB').url).toContain('google.co.uk');
+      expect(body('US').url).toContain('google.com');
+   });
+
+   it('keeps working where language and country codes coincide', () => {
+      expect(body('FR').url).toContain('hl=fr');
+      expect(body('FR').url).toContain('gl=fr');
+      expect(body('FR').url).toContain('google.fr');
+      expect(body('PT').url).toContain('hl=pt');
+   });
+
+   it('falls back on English for a country it does not know', () => {
+      expect(body('ZZ').url).toContain('hl=en');
    });
 });
