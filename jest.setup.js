@@ -1,4 +1,17 @@
 // eslint-disable-next-line no-unused-vars
+import { TextDecoder, TextEncoder } from 'util';
+import { BroadcastChannel } from 'worker_threads';
+import { ReadableStream, TransformStream, WritableStream } from 'stream/web';
+
+// jsdom provides none of these Web APIs, yet msw reaches for them at import
+// time. Without them every suite that imports the request mocks dies before a
+// single test runs.
+const webGlobals = { TextEncoder, TextDecoder, BroadcastChannel, ReadableStream, TransformStream, WritableStream };
+Object.entries(webGlobals).forEach(([name, value]) => {
+   if (typeof global[name] === 'undefined') { global[name] = value; }
+});
+
+// eslint-disable-next-line no-unused-vars
 import 'isomorphic-fetch';
 import './styles/globals.css';
 import '@testing-library/jest-dom';
