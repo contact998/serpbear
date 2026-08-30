@@ -141,6 +141,21 @@ export const readScraperResponse = async (response: any): Promise<any> => {
 };
 
 /**
+ * Append what actually went wrong to a page-level failure count.
+ *
+ * Without this the dashboard only ever showed "Scraper failed on all 1 pages",
+ * which names no cause: the real reason lived in the container logs, where
+ * nobody looks. Duplicates are collapsed because every page usually fails the
+ * same way, and the whole thing is capped so a long provider message cannot
+ * bloat the stored error.
+ */
+const describePageErrors = (messages: string[]): string => {
+   const seen = [...new Set(messages.map((m) => m.replace(PROVIDER_REFUSAL, '')))].filter(Boolean);
+   if (seen.length === 0) { return ''; }
+   return ` — ${seen.join('; ')}`.slice(0, 220);
+};
+
+/**
  * One attempt at a single page of Google Search results, positions offset.
  */
 const attemptSinglePage = async (
@@ -284,14 +299,14 @@ export const scrapeKeywordWithStrategy = async (
    }
 
    const allScrapedResults: SearchResult[] = [];
+   const pageErrorMessages: string[] = [];
    let pageErrors = 0;
    let totalPagesAttempted = pagesToScrape.length;
    for (const pageNum of pagesToScrape) {
       const pagination: ScraperPagination = { start: (pageNum - 1) * PAGE_SIZE, num: PAGE_SIZE, page: pageNum };
       // eslint-disable-next-line no-await-in-loop
       const pageResult = await scrapeSinglePage(keyword, settings, scraperObj, pagination);
-      const errTag = pageResult.error ? ` (error: ${pageResult.error})` : '';
-      if (pageResult.error) { pageErrors += 1; }
+      if (pageResult.error) { pageErrors += 1; pageErrorMessages.push(pageResult.error); }
       if (pageResult.results.length > 0) { allScrapedResults.push(...pageResult.results); }
    }
 
@@ -307,7 +322,7 @@ export const scrapeKeywordWithStrategy = async (
             // eslint-disable-next-line no-await-in-loop
             const pageResult = await scrapeSinglePage(keyword, settings, scraperObj, pagination);
             totalPagesAttempted += 1;
-            if (pageResult.error) { pageErrors += 1; }
+            if (pageResult.error) { pageErrors += 1; pageErrorMessages.push(pageResult.error); }
             if (pageResult.results.length > 0) {
                allScrapedResults.push(...pageResult.results);
                // Stop early if domain is found on this page
@@ -322,7 +337,7 @@ export const scrapeKeywordWithStrategy = async (
 
    if (allScrapedResults.length === 0) {
       const errorMsg = pageErrors > 0
-         ? `Scraper failed on all ${pageErrors} pages for ${keyword.keyword}`
+         ? `Scraper failed on all ${pageErrors} pages for ${keyword.keyword}${describePageErrors(pageErrorMessages)}`
          : `No search results found on any of the ${totalPagesAttempted} scraped pages`;
       return { ...errorResult, error: errorMsg };
    }
@@ -332,7 +347,8 @@ export const scrapeKeywordWithStrategy = async (
    // If domain not found and more than half of the scraped pages had errors,
    // the scraper was unreliable — treat as error to avoid false position=0.
    if (finalSerp.position === 0 && pageErrors > totalPagesAttempted / 2) {
-      const errorMsg = `${pageErrors}/${totalPagesAttempted} pages failed — scraper too unreliable to determine position`;
+      const errorMsg = `${pageErrors}/${totalPagesAttempted} pages failed — scraper too unreliable`
+         + ` to determine position${describePageErrors(pageErrorMessages)}`;
       return { ...errorResult, error: errorMsg };
    }
 

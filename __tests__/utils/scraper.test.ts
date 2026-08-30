@@ -79,3 +79,33 @@ describe('scrapeKeywordWithStrategy retry', () => {
       expect((fetch as any).mock.calls).toHaveLength(1);
    });
 });
+
+describe('failure messages carry their cause', () => {
+   const keyword = { ...dummyKeywords[0], country: 'FR', position: 0 } as any;
+   const settings = { ...dummySettings, scraper_type: 'brightdata', scaping_api: 'token', scrape_strategy: 'basic' } as any;
+
+   beforeEach(() => { jest.useFakeTimers(); (fetch as any).resetMocks(); });
+   afterEach(() => { jest.useRealTimers(); });
+
+   it('names the provider error instead of only counting failed pages', async () => {
+      (fetch as any).mockResponses(
+         ['', { status: 200, headers: { 'x-brd-error': 'redirect location was rejected' } }],
+         ['', { status: 200, headers: { 'x-brd-error': 'redirect location was rejected' } }],
+      );
+      const promise = scrapeKeywordWithStrategy(keyword, settings);
+      await jest.advanceTimersByTimeAsync(10000);
+      const result = await promise;
+      expect((result as any).error).toMatch(/Scraper failed on all 1 pages/);
+      expect((result as any).error).toMatch(/redirect location was rejected/);
+      // The internal routing marker never reaches the dashboard.
+      expect((result as any).error).not.toMatch(/PROVIDER_REFUSAL/);
+   });
+
+   it('leaves the no-result message alone when nothing failed', async () => {
+      (fetch as any).mockResponses([JSON.stringify({ organic: [] }), { status: 200 }]);
+      const promise = scrapeKeywordWithStrategy(keyword, settings);
+      await jest.advanceTimersByTimeAsync(10000);
+      const result = await promise;
+      expect((result as any).error).toMatch(/No search results found/);
+   });
+});
