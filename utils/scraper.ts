@@ -32,6 +32,8 @@ export type RefreshResult = false | {
 
 const TOTAL_PAGES = 10;
 const PAGE_SIZE = 10;
+/** Pause before the single retry of a provider refusal, in milliseconds. */
+const PROVIDER_RETRY_DELAY = 5000;
 
 /**
  * Creates a SERP Scraper client promise based on the app settings.
@@ -108,10 +110,40 @@ export const getScraperClient = (
    return client;
 };
 
+/** Marks a failure the provider reported instead of returning results — worth one more try. */
+const PROVIDER_REFUSAL = 'PROVIDER_REFUSAL: ';
+
 /**
- * Scrape a single page of Google Search results with absolute position offsets applied.
+ * Read a scraper API response as JSON, surfacing failures the provider hides.
+ *
+ * Bright Data answers HTTP 200 with an EMPTY body when Google hands its exit
+ * node a CAPTCHA or rejects a redirect; the real outcome only appears in the
+ * x-brd-error headers. Calling .json() on that body throws "Unexpected end of
+ * JSON input", which reached the keyword as the useless "Scraper failed on all
+ * 1 pages". Measured on the live API 2026-08-30: 2 of 8 then 1 of 6 calls came
+ * back empty with `x-brd-error: redirect location was rejected`,
+ * `x-brd-error-code: captcha`, `x-brd-status-code: 502`.
  */
-const scrapeSinglePage = async (
+export const readScraperResponse = async (response: any): Promise<any> => {
+   const body = await response.text();
+   const providerError = response.headers?.get?.('x-brd-error') || response.headers?.get?.('x-brd-error-code') || '';
+   if (!body.trim()) {
+      const detail = providerError || `no body, HTTP ${response.status}`;
+      throw new Error(`${PROVIDER_REFUSAL}the scraper API returned nothing (${detail})`);
+   }
+   try {
+      return JSON.parse(body);
+   } catch (error) {
+      // Bright Data also refuses a query in plain text ("This query is ...").
+      const detail = providerError ? `${providerError}: ` : '';
+      throw new Error(`${PROVIDER_REFUSAL}non-JSON response (HTTP ${response.status}) ${detail}${body.slice(0, 120)}`);
+   }
+};
+
+/**
+ * One attempt at a single page of Google Search results, positions offset.
+ */
+const attemptSinglePage = async (
    keyword: KeywordType,
    settings: SettingsType,
    scraperObj: ScraperSettings | undefined,
@@ -121,7 +153,7 @@ const scrapeSinglePage = async (
    const scraperClient = getScraperClient(keyword, settings, scraperObj, pagination);
    if (!scraperClient) { return { results: [], error: 'No scraper client available' }; }
    try {
-      const res = scraperType === 'proxy' && settings.proxy ? await scraperClient : await scraperClient.then((result:any) => result.json());
+      const res = scraperType === 'proxy' && settings.proxy ? await scraperClient : await readScraperResponse(await scraperClient);
       const scraperResult = scraperObj?.resultObjectKey && res[scraperObj.resultObjectKey] ? res[scraperObj.resultObjectKey] : '';
       const scrapeResult: string = (scraperResult || res.data || res.html || res.results || '');
       if (res && scrapeResult) {
@@ -134,6 +166,32 @@ const scrapeSinglePage = async (
       console.log('[ERROR] Scraping page', pagination.page, 'for keyword:', keyword.keyword, msg);
       return { results: [], error: msg };
    }
+};
+
+/**
+ * Scrape a single page, retrying ONCE when the provider refused rather than answered.
+ *
+ * A CAPTCHA served to one exit node says nothing about the next one, and the
+ * attempts are independent — one retry takes a ~25% failure rate to ~6%. It is
+ * deliberately limited to provider refusals: an empty or malformed answer is
+ * not the `failed_query_rejected` case, where replaying a query Google has just
+ * flagged would freeze it across the whole zone.
+ */
+const scrapeSinglePage = async (
+   keyword: KeywordType,
+   settings: SettingsType,
+   scraperObj: ScraperSettings | undefined,
+   pagination: ScraperPagination,
+): Promise<PageScrapeResult> => {
+   const firstTry = await attemptSinglePage(keyword, settings, scraperObj, pagination);
+   if (!firstTry.error || !firstTry.error.startsWith(PROVIDER_REFUSAL)) { return firstTry; }
+
+   await new Promise((resolve) => { setTimeout(resolve, PROVIDER_RETRY_DELAY); });
+   const secondTry = await attemptSinglePage(keyword, settings, scraperObj, pagination);
+   if (secondTry.error) {
+      return { ...secondTry, error: `${secondTry.error} (twice)` };
+   }
+   return secondTry;
 };
 
 /**
