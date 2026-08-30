@@ -97,7 +97,12 @@ export const getScraperClient = (
       const p = pagination || { start: 0, num: PAGE_SIZE };
       client = axiosClient.get(`https://www.google.com/search?num=${p.num}&start=${p.start}&q=${encodeURI(keyword.keyword)}`);
    } else {
-      client = fetch(apiURL, { method: 'GET', headers });
+      // Some scraper APIs (Bright Data's SERP API) take their parameters in a
+      // JSON payload rather than the query string, so a scraper may declare its
+      // own method and body. Everything else keeps the historical plain GET.
+      const method = scraper?.method || 'GET';
+      const payload = method !== 'GET' && scraper?.body ? scraper.body(keyword, settings, pagination) : null;
+      client = fetch(apiURL, payload ? { method, headers, body: JSON.stringify(payload) } : { method, headers });
    }
 
    return client;
