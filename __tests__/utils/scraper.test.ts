@@ -143,3 +143,36 @@ describe('brightdata request', () => {
       expect(body('ZZ').url).toContain('hl=en');
    });
 });
+
+describe('retry waits out a cooldown the provider states', () => {
+   const keyword = { ...dummyKeywords[0], country: 'FR', position: 0 } as any;
+   const settings = { ...dummySettings, scraper_type: 'brightdata', scaping_api: 'token', scrape_strategy: 'basic' } as any;
+   const cooldown = 'This query recently failed and cannot be attempted at this time.'
+      + ' Please try again later, after a minimum of 15 seconds.';
+   const organic = JSON.stringify({ organic: [{ title: 'Compress Image', link: 'https://compressimage.io/', rank: 1 }] });
+
+   beforeEach(() => { jest.useFakeTimers(); (fetch as any).resetMocks(); });
+   afterEach(() => { jest.useRealTimers(); });
+
+   it('does not retry before the stated 15 seconds have passed', async () => {
+      (fetch as any).mockResponses([cooldown, { status: 200 }], [organic, { status: 200 }]);
+      const promise = scrapeKeywordWithStrategy(keyword, settings);
+      await jest.advanceTimersByTimeAsync(14000);
+      expect((fetch as any).mock.calls).toHaveLength(1);
+      await jest.advanceTimersByTimeAsync(10000);
+      expect((fetch as any).mock.calls).toHaveLength(2);
+      const result = await promise;
+      expect((result as any).error).toBeFalsy();
+   });
+
+   it('still retries a CAPTCHA quickly, since no cooldown is stated', async () => {
+      (fetch as any).mockResponses(
+         ['', { status: 200, headers: { 'x-brd-error': 'redirect location was rejected' } }],
+         [organic, { status: 200 }],
+      );
+      const promise = scrapeKeywordWithStrategy(keyword, settings);
+      await jest.advanceTimersByTimeAsync(6000);
+      expect((fetch as any).mock.calls).toHaveLength(2);
+      await promise;
+   });
+});

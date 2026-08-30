@@ -34,6 +34,8 @@ const TOTAL_PAGES = 10;
 const PAGE_SIZE = 10;
 /** Pause before the single retry of a provider refusal, in milliseconds. */
 const PROVIDER_RETRY_DELAY = 5000;
+/** Added to a cooldown the provider names, so the retry lands after it, not on it. */
+const PROVIDER_COOLDOWN_MARGIN = 5000;
 
 /**
  * Creates a SERP Scraper client promise based on the app settings.
@@ -184,13 +186,28 @@ const attemptSinglePage = async (
 };
 
 /**
+ * How long to wait before the single retry, honouring a cooldown the provider states.
+ *
+ * Bright Data freezes a query Google has just flagged and says so in prose:
+ * "This query recently failed and cannot be attempted at this time. Please try
+ * again later, after a minimum of 15 seconds." Retrying at 5s lands inside that
+ * window and fails again for the same reason — measured on 5 of the 7 keywords
+ * still failing on 2026-08-30. Waiting the stated cooldown is what the provider
+ * asks for; it is not hammering.
+ */
+const retryDelayFor = (message: string): number => {
+   const stated = message.match(/minimum of (\d+) seconds/);
+   if (!stated) { return PROVIDER_RETRY_DELAY; }
+   return (parseInt(stated[1], 10) * 1000) + PROVIDER_COOLDOWN_MARGIN;
+};
+
+/**
  * Scrape a single page, retrying ONCE when the provider refused rather than answered.
  *
  * A CAPTCHA served to one exit node says nothing about the next one, and the
- * attempts are independent — one retry takes a ~25% failure rate to ~6%. It is
- * deliberately limited to provider refusals: an empty or malformed answer is
- * not the `failed_query_rejected` case, where replaying a query Google has just
- * flagged would freeze it across the whole zone.
+ * attempts are independent — one retry takes a ~21% failure rate to ~4%. It is
+ * deliberately limited to provider refusals: a well-formed answer holding no
+ * result is never replayed.
  */
 const scrapeSinglePage = async (
    keyword: KeywordType,
@@ -201,7 +218,7 @@ const scrapeSinglePage = async (
    const firstTry = await attemptSinglePage(keyword, settings, scraperObj, pagination);
    if (!firstTry.error || !firstTry.error.startsWith(PROVIDER_REFUSAL)) { return firstTry; }
 
-   await new Promise((resolve) => { setTimeout(resolve, PROVIDER_RETRY_DELAY); });
+   await new Promise((resolve) => { setTimeout(resolve, retryDelayFor(firstTry.error as string)); });
    const secondTry = await attemptSinglePage(keyword, settings, scraperObj, pagination);
    if (secondTry.error) {
       return { ...secondTry, error: `${secondTry.error} (twice)` };
