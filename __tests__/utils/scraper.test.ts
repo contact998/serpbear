@@ -144,7 +144,7 @@ describe('brightdata request', () => {
    });
 });
 
-describe('retry waits out a cooldown the provider states', () => {
+describe('a cooldown refusal is waited out, not replayed', () => {
    const keyword = { ...dummyKeywords[0], country: 'FR', position: 0 } as any;
    const settings = { ...dummySettings, scraper_type: 'brightdata', scaping_api: 'token', scrape_strategy: 'basic' } as any;
    const cooldown = 'This query recently failed and cannot be attempted at this time.'
@@ -154,18 +154,27 @@ describe('retry waits out a cooldown the provider states', () => {
    beforeEach(() => { jest.useFakeTimers(); (fetch as any).resetMocks(); });
    afterEach(() => { jest.useRealTimers(); });
 
-   it('does not retry before the stated 15 seconds have passed', async () => {
+   it('never calls again on a query the provider has frozen', async () => {
       (fetch as any).mockResponses([cooldown, { status: 200 }], [organic, { status: 200 }]);
       const promise = scrapeKeywordWithStrategy(keyword, settings);
-      await jest.advanceTimersByTimeAsync(14000);
-      expect((fetch as any).mock.calls).toHaveLength(1);
-      await jest.advanceTimersByTimeAsync(10000);
-      expect((fetch as any).mock.calls).toHaveLength(2);
+      await jest.advanceTimersByTimeAsync(60000);
       const result = await promise;
-      expect((result as any).error).toBeFalsy();
+      // One call, whatever the wait: replaying a flagged query degrades the zone
+      // for every other keyword, and this one comes back in the next run anyway.
+      expect((fetch as any).mock.calls).toHaveLength(1);
+      expect((result as any).error).toMatch(/left for the next run/);
    });
 
-   it('still retries a CAPTCHA quickly, since no cooldown is stated', async () => {
+   it('says in the stored error that the skip was deliberate', async () => {
+      (fetch as any).mockResponses([cooldown, { status: 200 }]);
+      const promise = scrapeKeywordWithStrategy(keyword, settings);
+      await jest.advanceTimersByTimeAsync(60000);
+      const result = await promise;
+      expect((result as any).error).toMatch(/recently failed/);
+      expect((result as any).error).not.toMatch(/PROVIDER_REFUSAL/);
+   });
+
+   it('still retries a CAPTCHA quickly, since nothing was frozen', async () => {
       (fetch as any).mockResponses(
          ['', { status: 200, headers: { 'x-brd-error': 'redirect location was rejected' } }],
          [organic, { status: 200 }],
@@ -173,6 +182,7 @@ describe('retry waits out a cooldown the provider states', () => {
       const promise = scrapeKeywordWithStrategy(keyword, settings);
       await jest.advanceTimersByTimeAsync(6000);
       expect((fetch as any).mock.calls).toHaveLength(2);
-      await promise;
+      const result = await promise;
+      expect((result as any).error).toBeFalsy();
    });
 });

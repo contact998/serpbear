@@ -34,8 +34,6 @@ const TOTAL_PAGES = 10;
 const PAGE_SIZE = 10;
 /** Pause before the single retry of a provider refusal, in milliseconds. */
 const PROVIDER_RETRY_DELAY = 5000;
-/** Added to a cooldown the provider names, so the retry lands after it, not on it. */
-const PROVIDER_COOLDOWN_MARGIN = 5000;
 
 /**
  * Creates a SERP Scraper client promise based on the app settings.
@@ -186,28 +184,31 @@ const attemptSinglePage = async (
 };
 
 /**
- * How long to wait before the single retry, honouring a cooldown the provider states.
+ * A refusal to wait out rather than retry.
  *
- * Bright Data freezes a query Google has just flagged and says so in prose:
+ * Bright Data freezes a query Google has just flagged, and says so in prose:
  * "This query recently failed and cannot be attempted at this time. Please try
- * again later, after a minimum of 15 seconds." Retrying at 5s lands inside that
- * window and fails again for the same reason — measured on 5 of the 7 keywords
- * still failing on 2026-08-30. Waiting the stated cooldown is what the provider
- * asks for; it is not hammering.
+ * again later, after a minimum of 15 seconds." Retrying after that stated delay
+ * plus a margin was STILL refused for the same reason — all 9 keywords that
+ * failed in the 2026-08-31 nightly run carried this message, so the freeze
+ * outlasts what it announces. Replaying a flagged query is also what Bright
+ * Data's own documentation warns against: it degrades the success rate of the
+ * whole zone, for every other keyword too.
+ *
+ * Nothing is lost by leaving it: on error the keyword's lastUpdated is not
+ * touched, so it simply comes back in the next run.
  */
-const retryDelayFor = (message: string): number => {
-   const stated = message.match(/minimum of (\d+) seconds/);
-   if (!stated) { return PROVIDER_RETRY_DELAY; }
-   return (parseInt(stated[1], 10) * 1000) + PROVIDER_COOLDOWN_MARGIN;
-};
+const isCooldownRefusal = (message: string): boolean => (
+   /recently failed|minimum of \d+ seconds/i.test(message)
+);
 
 /**
  * Scrape a single page, retrying ONCE when the provider refused rather than answered.
  *
  * A CAPTCHA served to one exit node says nothing about the next one, and the
- * attempts are independent — one retry takes a ~21% failure rate to ~4%. It is
- * deliberately limited to provider refusals: a well-formed answer holding no
- * result is never replayed.
+ * attempts are independent — one retry takes a ~21% failure rate to ~6%. It is
+ * deliberately narrow: a well-formed answer holding no result is never
+ * replayed, and neither is a refusal the provider asked us to wait out.
  */
 const scrapeSinglePage = async (
    keyword: KeywordType,
@@ -217,8 +218,11 @@ const scrapeSinglePage = async (
 ): Promise<PageScrapeResult> => {
    const firstTry = await attemptSinglePage(keyword, settings, scraperObj, pagination);
    if (!firstTry.error || !firstTry.error.startsWith(PROVIDER_REFUSAL)) { return firstTry; }
+   if (isCooldownRefusal(firstTry.error)) {
+      return { ...firstTry, error: `${firstTry.error} (left for the next run rather than replayed)` };
+   }
 
-   await new Promise((resolve) => { setTimeout(resolve, retryDelayFor(firstTry.error as string)); });
+   await new Promise((resolve) => { setTimeout(resolve, PROVIDER_RETRY_DELAY); });
    const secondTry = await attemptSinglePage(keyword, settings, scraperObj, pagination);
    if (secondTry.error) {
       return { ...secondTry, error: `${secondTry.error} (twice)` };
