@@ -47,6 +47,24 @@ const PROVIDER_RETRY_DELAY = 5000;
  */
 const scraperCallTimeout = (): number => parseInt(process.env.SCRAPER_TIMEOUT_MS || '', 10) || 120000;
 
+/** Bound headers and body together, even when the transport ignores abort. */
+const withScraperDeadline = async <T>(work: (signal: AbortSignal) => Promise<T>): Promise<T> => {
+   const deadline = new AbortController();
+   let timer: ReturnType<typeof setTimeout> | undefined;
+   try {
+      const timeout = new Promise<never>((resolve, reject) => {
+         timer = setTimeout(() => {
+            reject(Object.assign(new Error(`no answer from the scraper API after ${Math.round(scraperCallTimeout() / 1000)} s`),
+               { name: 'TimeoutError' }));
+            deadline.abort();
+         }, scraperCallTimeout());
+      });
+      return await Promise.race([work(deadline.signal), timeout]);
+   } finally {
+      clearTimeout(timer);
+   }
+};
+
 /**
  * Creates a SERP Scraper client promise based on the app settings.
  * @param {KeywordType} keyword - the keyword to get the SERP for.
@@ -60,6 +78,7 @@ export const getScraperClient = (
    settings:SettingsType,
    scraper?: ScraperSettings,
    pagination?: ScraperPagination,
+   signal?: AbortSignal,
 ): Promise<AxiosResponse|Response> | false => {
    let apiURL = ''; let client: Promise<AxiosResponse|Response> | false = false;
    const headers: any = {
@@ -107,6 +126,7 @@ export const getScraperClient = (
 
       axiosConfig.httpsAgent = new (HttpsProxyAgent as any)(proxyURL.trim());
       axiosConfig.proxy = false;
+      axiosConfig.signal = signal;
       const axiosClient = axios.create(axiosConfig);
       const p = pagination || { start: 0, num: PAGE_SIZE };
       client = axiosClient.get(`https://www.google.com/search?num=${p.num}&start=${p.start}&q=${encodeURI(keyword.keyword)}`);
@@ -116,12 +136,10 @@ export const getScraperClient = (
       // own method and body. Everything else keeps the historical plain GET.
       const method = scraper?.method || 'GET';
       const payload = method !== 'GET' && scraper?.body ? scraper.body(keyword, settings, pagination) : null;
-      const deadline = new AbortController();
-      const timer = setTimeout(() => deadline.abort(), scraperCallTimeout());
       const init = payload
-         ? { method, headers, body: JSON.stringify(payload), signal: deadline.signal }
-         : { method, headers, signal: deadline.signal };
-      client = fetch(apiURL, init).finally(() => clearTimeout(timer));
+         ? { method, headers, body: JSON.stringify(payload), signal }
+         : { method, headers, signal };
+      client = fetch(apiURL, init);
    }
 
    return client;
@@ -182,10 +200,12 @@ const attemptSinglePage = async (
    pagination: ScraperPagination,
 ): Promise<PageScrapeResult> => {
    const scraperType = settings?.scraper_type || '';
-   const scraperClient = getScraperClient(keyword, settings, scraperObj, pagination);
-   if (!scraperClient) { return { results: [], error: 'No scraper client available' }; }
    try {
-      const res = scraperType === 'proxy' && settings.proxy ? await scraperClient : await readScraperResponse(await scraperClient);
+      const res = await withScraperDeadline(async (signal) => {
+         const client = getScraperClient(keyword, settings, scraperObj, pagination, signal);
+         if (!client) { throw new Error('No scraper client available'); }
+         return scraperType === 'proxy' && settings.proxy ? client : client.then(readScraperResponse);
+      });
       const scraperResult = scraperObj?.resultObjectKey && res[scraperObj.resultObjectKey] ? res[scraperObj.resultObjectKey] : '';
       const scrapeResult: string = (scraperResult || res.data || res.html || res.results || '');
       if (res && scrapeResult) {
@@ -427,13 +447,14 @@ export const scrapeKeywordFromGoogle = async (keyword:KeywordType, settings:Sett
    const scraperType = settings?.scraper_type || '';
    const scraperObj = allScrapers.find((scraper:ScraperSettings) => scraper.id === scraperType);
    const nativePagination: ScraperPagination = { start: 0, num: 100, page: 1 };
-   const scraperClient = getScraperClient(keyword, settings, scraperObj, nativePagination);
-
-   if (!scraperClient) { return false; }
 
    let scraperError:any = null;
    try {
-      const res = scraperType === 'proxy' && settings.proxy ? await scraperClient : await scraperClient.then((result:any) => result.json());
+      const res = await withScraperDeadline(async (signal) => {
+         const client = getScraperClient(keyword, settings, scraperObj, nativePagination, signal);
+         if (!client) { throw new Error('No scraper client available'); }
+         return scraperType === 'proxy' && settings.proxy ? client : client.then((result:any) => result.json());
+      });
       const scraperResult = scraperObj?.resultObjectKey && res[scraperObj.resultObjectKey] ? res[scraperObj.resultObjectKey] : '';
       const scrapeResult:string = (scraperResult || res.data || res.html || res.results || '');
       if (res && scrapeResult) {
@@ -447,7 +468,7 @@ export const scrapeKeywordFromGoogle = async (keyword:KeywordType, settings:Sett
          throw new Error(res);
       }
    } catch (error:any) {
-      refreshedResults.error = scraperError || 'Unknown Error';
+      refreshedResults.error = scraperError || error?.message || 'Unknown Error';
       if (settings.scraper_type === 'proxy' && error && error.response && error.response.statusText) {
          refreshedResults.error = `[${error.response.status}] ${error.response.statusText}`;
       } else if (settings.scraper_type === 'proxy' && error) {
