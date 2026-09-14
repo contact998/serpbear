@@ -76,6 +76,13 @@ const urlFromDisplayLink = (displayLink: string): string => {
    // Always https: getSerp only recognises that scheme, and the displayed one
    // says nothing about where the site ranks.
    const base = `https://${head.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
+   // Social results can display an audience count instead of an address
+   // (observed: "Plus de 170 abonnés"). Keep their original Google link.
+   try {
+      if (!new URL(base).hostname.includes('.')) { return ''; }
+   } catch (error) {
+      return '';
+   }
    const elided = crumbs.some((crumb) => /\.\.\.|…/.test(crumb));
    return crumbs.length && !elided ? `${base}/${crumbs.join('/')}` : base;
 };

@@ -225,6 +225,18 @@ describe('brightdata extractor survives Google redirect links', () => {
    });
 });
 
+describe('Bright Data social captions are not URLs', () => {
+   it.each(['Plus de 170 abonnés', 'Plus de 2,3 k abonnés', '170 followers'])('keeps the redirect for %s and ranks subsequent results', (caption) => {
+      const redirect = 'https://www.google.fr/goto?url=opaque';
+      const extracted = brightdata.serpExtractor!([
+         { title: 'Ciné voiture', link: redirect, display_link: caption },
+         { title: 'Hallucine', link: 'https://hallucinecran.fr/' },
+      ] as any, 'desktop');
+      expect(extracted[0].url).toBe(redirect);
+      expect(getSerp('hallucinecran.fr', extracted).position).toBe(2);
+   });
+});
+
 describe('a scraper API call that never answers is abandoned', () => {
    const keyword = { ...dummyKeywords[0], country: 'FR', position: 0 } as any;
    const settings = { ...dummySettings, scraper_type: 'brightdata', scaping_api: 'token', scrape_strategy: 'basic' } as any;
