@@ -3,6 +3,7 @@ import countries from '../../utils/countries';
 interface BrightDataOrganicResult {
    title?: string,
    link?: string,
+   display_link?: string,
    rank?: number,
    global_rank?: number,
 }
@@ -44,6 +45,45 @@ const GOOGLE_DOMAINS: Record<string, string> = {
  * countries[code][2] is the language, and is what the other scrapers read.
  */
 const languageOf = (country: string): string => countries[country]?.[2] || 'en';
+
+/**
+ * Google now serves most result links as `https://www.google.<tld>/goto?url=<opaque
+ * token>`, and Bright Data's parser passes them through in `link` untouched
+ * (measured 2026-09-14 on the live API: 4 of 6 organic results). Such a link
+ * can never match the tracked domain, so every keyword fell to position 0
+ * with no error raised — the silent failure the whole JSON switch was meant
+ * to end. The same change already broke the HTML `proxy` scraper on 2026-08-06.
+ */
+const isGoogleRedirect = (link: string): boolean => {
+   try {
+      const { hostname, pathname } = new URL(link);
+      return /(^|\.)google\.[a-z.]+$/.test(hostname) && ['/goto', '/url'].includes(pathname);
+   } catch (error) {
+      return false;
+   }
+};
+
+/**
+ * Rebuild a usable URL from what Google DISPLAYS for the result:
+ * `https://hallucinecran.fr › ecran-gonflable-economique` — the real host, then
+ * the breadcrumb shown in place of the path. The host is what ranks the
+ * domain; the breadcrumb is kept as the path only when Google did not elide
+ * it ("…"), since a truncated path would point at a page that does not exist.
+ */
+const urlFromDisplayLink = (displayLink: string): string => {
+   const [head, ...crumbs] = displayLink.split('›').map((part) => part.trim()).filter(Boolean);
+   if (!head) { return ''; }
+   // Always https: getSerp only recognises that scheme, and the displayed one
+   // says nothing about where the site ranks.
+   const base = `https://${head.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
+   const elided = crumbs.some((crumb) => /\.\.\.|…/.test(crumb));
+   return crumbs.length && !elided ? `${base}/${crumbs.join('/')}` : base;
+};
+
+const resultURL = (link: string, displayLink?: string): string => {
+   if (!isGoogleRedirect(link) || !displayLink) { return link; }
+   return urlFromDisplayLink(displayLink) || link;
+};
 
 const brightdata: ScraperSettings = {
    id: 'brightdata',
@@ -87,11 +127,11 @@ const brightdata: ScraperSettings = {
          : content as unknown as BrightDataOrganicResult[];
 
       for (let index = 0; index < results.length; index += 1) {
-         const { title, link, rank, global_rank: globalRank } = results[index];
+         const { title, link, display_link: displayLink, rank, global_rank: globalRank } = results[index];
          if (title && link) {
             extractedResult.push({
                title,
-               url: link,
+               url: resultURL(link, displayLink),
                // Bright Data numbers the organic block itself; fall back on the
                // array order when it does not.
                position: globalRank || rank || index + 1,
