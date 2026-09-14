@@ -1,4 +1,4 @@
-import { getSerp, readScraperResponse, scrapeKeywordWithStrategy } from '../../utils/scraper';
+import { getSerp, readScraperResponse, scrapeKeywordFromGoogle, scrapeKeywordWithStrategy } from '../../utils/scraper';
 import { dummyKeywords, dummySettings } from '../../__mocks__/data';
 import brightdata from '../../scrapers/services/brightdata';
 
@@ -251,6 +251,36 @@ describe('a scraper API call that never answers is abandoned', () => {
       await scrapeKeywordWithStrategy(keyword, settings);
       expect((fetch as any).mock.calls.length).toBe(1);
    });
+
+   it.each(['headers', 'body'])('abandons stuck %s, aborts the request and allows the next keyword', async (stage) => {
+      let signal: AbortSignal;
+      (fetch as any).mockImplementationOnce((url: string, init: any) => {
+         signal = init.signal;
+         return stage === 'headers' ? new Promise(() => {}) : Promise.resolve({
+            status: 200,
+            headers: { get: () => null },
+            text: () => new Promise(() => {}),
+         });
+      });
+      const result = await scrapeKeywordWithStrategy(keyword, settings);
+      expect((result as any).error).toMatch(/no answer from the scraper API/);
+      expect(signal!.aborted).toBe(true);
+      (fetch as any).mockResponseOnce(JSON.stringify({ organic: [{ title: 'Next', link: 'https://compressimage.io/' }] }));
+      const next = await scrapeKeywordWithStrategy({ ...keyword, keyword: 'next keyword' }, settings);
+      expect((next as any).error).toBeFalsy();
+      expect((fetch as any).mock.calls.length).toBe(2);
+   }, 1000);
+
+   it('also bounds the body in the keyword preview path', async () => {
+      let signal: AbortSignal;
+      (fetch as any).mockImplementationOnce((url: string, init: any) => {
+         signal = init.signal;
+         return Promise.resolve({ json: () => new Promise(() => {}) });
+      });
+      const result = await scrapeKeywordFromGoogle(keyword, settings);
+      expect((result as any).error).toMatch(/no answer from the scraper API/);
+      expect(signal!.aborted).toBe(true);
+   }, 1000);
 
    it('passes the deadline to fetch on every call', async () => {
       (fetch as any).mockResponses([JSON.stringify({ organic: [] }), { status: 200 }]);
