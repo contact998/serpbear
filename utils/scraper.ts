@@ -34,6 +34,9 @@ const TOTAL_PAGES = 10;
 const PAGE_SIZE = 10;
 /** Pause before the single retry of a provider refusal, in milliseconds. */
 const PROVIDER_RETRY_DELAY = 5000;
+// Bright Data can freeze a query for 15 s after a CAPTCHA. A 5 s retry
+// falls inside that window; allow a margin while keeping the single retry.
+const BRIGHTDATA_RETRY_DELAY = 20000;
 
 /**
  * How long one scraper API call may take before it is abandoned.
@@ -245,10 +248,10 @@ const isCooldownRefusal = (message: string): boolean => (
 /**
  * Scrape a single page, retrying ONCE when the provider refused rather than answered.
  *
- * A CAPTCHA served to one exit node says nothing about the next one, and the
- * attempts are independent — one retry takes a ~21% failure rate to ~6%. It is
- * deliberately narrow: a well-formed answer holding no result is never
- * replayed, and neither is a refusal the provider asked us to wait out.
+ * Bright Data's attempts are not independent: a CAPTCHA can freeze the query
+ * for at least 15 seconds. Wait beyond that window before the single retry.
+ * A well-formed answer holding no result is never replayed, and neither is an
+ * explicit cooldown refusal (left for the next scheduled run).
  */
 const scrapeSinglePage = async (
    keyword: KeywordType,
@@ -262,7 +265,8 @@ const scrapeSinglePage = async (
       return { ...firstTry, error: `${firstTry.error} (left for the next run rather than replayed)` };
    }
 
-   await new Promise((resolve) => { setTimeout(resolve, PROVIDER_RETRY_DELAY); });
+   const retryDelay = settings.scraper_type === 'brightdata' ? BRIGHTDATA_RETRY_DELAY : PROVIDER_RETRY_DELAY;
+   await new Promise((resolve) => { setTimeout(resolve, retryDelay); });
    const secondTry = await attemptSinglePage(keyword, settings, scraperObj, pagination);
    if (secondTry.error) {
       return { ...secondTry, error: `${secondTry.error} (twice)` };

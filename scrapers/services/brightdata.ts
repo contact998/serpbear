@@ -30,10 +30,9 @@ interface BrightDataOrganicResult {
  * zone name comes from BRIGHTDATA_SERP_ZONE.
  */
 
-const GOOGLE_DOMAINS: Record<string, string> = {
-   GB: 'google.co.uk',
-   US: 'google.com',
-};
+// Google now serves every market on google.com. National TLDs add a
+// redirect; gl/hl and the exit country below retain the requested market.
+// https://docs.brightdata.com/products/serp-api/query-parameters/google
 
 /**
  * Google's `hl` is a LANGUAGE code, not a country one.
@@ -107,7 +106,6 @@ const brightdata: ScraperSettings = {
    method: 'POST',
    body: (keyword, settings, pagination) => {
       const country = (keyword.country || 'US').toUpperCase();
-      const domain = GOOGLE_DOMAINS[country] || `google.${country.toLowerCase()}`;
       const start = pagination?.start || 0;
       const parametres = [
          `q=${encodeURIComponent(keyword.keyword)}`,
@@ -123,7 +121,7 @@ const brightdata: ScraperSettings = {
          // markets, so DE/ES/IT/PT/GB/US positions were measured from France.
          zone: process.env.BRIGHTDATA_SERP_ZONE || 'serp',
          country: country.toLowerCase(),
-         url: `https://www.${domain}/search?${parametres}`,
+         url: `https://www.google.com/search?${parametres}`,
          format: 'raw',
       };
    },
