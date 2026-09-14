@@ -224,3 +224,37 @@ describe('brightdata extractor survives Google redirect links', () => {
       expect(getSerp('airscreen.fr', extracted).position).toBe(7);
    });
 });
+
+describe('a scraper API call that never answers is abandoned', () => {
+   const keyword = { ...dummyKeywords[0], country: 'FR', position: 0 } as any;
+   const settings = { ...dummySettings, scraper_type: 'brightdata', scaping_api: 'token', scrape_strategy: 'basic' } as any;
+
+   beforeEach(() => {
+      (fetch as any).resetMocks();
+      process.env.SCRAPER_TIMEOUT_MS = '50';
+   });
+   afterEach(() => { delete process.env.SCRAPER_TIMEOUT_MS; });
+
+   const neverAnswers = (url: string, init: any) => new Promise((resolve, reject) => {
+      init.signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
+   });
+
+   it('gives up after SCRAPER_TIMEOUT_MS and names the wait, not a vague failure', async () => {
+      (fetch as any).mockImplementation(neverAnswers);
+      const result = await scrapeKeywordWithStrategy(keyword, settings);
+      expect((result as any).error).toMatch(/no answer from the scraper API after 0 s/);
+      expect((result as any).error).not.toMatch(/aborted/);
+   });
+
+   it('does not replay a call that timed out', async () => {
+      (fetch as any).mockImplementation(neverAnswers);
+      await scrapeKeywordWithStrategy(keyword, settings);
+      expect((fetch as any).mock.calls.length).toBe(1);
+   });
+
+   it('passes the deadline to fetch on every call', async () => {
+      (fetch as any).mockResponses([JSON.stringify({ organic: [] }), { status: 200 }]);
+      await scrapeKeywordWithStrategy(keyword, settings);
+      expect((fetch as any).mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
+   });
+});
