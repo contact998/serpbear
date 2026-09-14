@@ -55,7 +55,7 @@ describe('scrapeKeywordWithStrategy retry', () => {
    afterEach(() => { jest.useRealTimers(); });
 
    const run = async (promise: Promise<any>) => {
-      await jest.advanceTimersByTimeAsync(10000);
+      await jest.advanceTimersByTimeAsync(30000);
       return promise;
    };
 
@@ -94,7 +94,7 @@ describe('failure messages carry their cause', () => {
          ['', { status: 200, headers: { 'x-brd-error': 'redirect location was rejected' } }],
       );
       const promise = scrapeKeywordWithStrategy(keyword, settings);
-      await jest.advanceTimersByTimeAsync(10000);
+      await jest.advanceTimersByTimeAsync(30000);
       const result = await promise;
       expect((result as any).error).toMatch(/Scraper failed on all 1 pages/);
       expect((result as any).error).toMatch(/redirect location was rejected/);
@@ -105,7 +105,7 @@ describe('failure messages carry their cause', () => {
    it('leaves the no-result message alone when nothing failed', async () => {
       (fetch as any).mockResponses([JSON.stringify({ organic: [] }), { status: 200 }]);
       const promise = scrapeKeywordWithStrategy(keyword, settings);
-      await jest.advanceTimersByTimeAsync(10000);
+      await jest.advanceTimersByTimeAsync(30000);
       const result = await promise;
       expect((result as any).error).toMatch(/No search results found/);
    });
@@ -118,6 +118,14 @@ describe('brightdata request', () => {
       { start: 0, num: 10, page: 1 },
    ) as any;
 
+   it.each(['ES', 'PT', 'GB', 'FR', 'DE', 'IT', 'US'])('uses google.com with the requested country %s', (country) => {
+      const request = body(country);
+      const url = new URL(request.url);
+      expect(url.hostname).toBe('www.google.com');
+      expect(url.searchParams.get('gl')).toBe(country.toLowerCase());
+      expect(request.country).toBe(country.toLowerCase());
+   });
+
    it('sends the LANGUAGE in hl, not the country', () => {
       // hl=gb and hl=us were rejected by Bright Data with HTTP 200 and
       // "the inputted language value (hl parameter) is not allowed".
@@ -126,16 +134,16 @@ describe('brightdata request', () => {
       expect(body('GB').url).not.toContain('hl=gb');
    });
 
-   it('still sends the country in gl and follows the national Google', () => {
+   it('still sends the country in gl', () => {
       expect(body('GB').url).toContain('gl=gb');
-      expect(body('GB').url).toContain('google.co.uk');
+      expect(body('GB').url).toContain('google.com');
       expect(body('US').url).toContain('google.com');
    });
 
    it('keeps working where language and country codes coincide', () => {
       expect(body('FR').url).toContain('hl=fr');
       expect(body('FR').url).toContain('gl=fr');
-      expect(body('FR').url).toContain('google.fr');
+      expect(body('FR').url).toContain('google.com');
       expect(body('PT').url).toContain('hl=pt');
    });
 
@@ -174,13 +182,15 @@ describe('a cooldown refusal is waited out, not replayed', () => {
       expect((result as any).error).not.toMatch(/PROVIDER_REFUSAL/);
    });
 
-   it('still retries a CAPTCHA quickly, since nothing was frozen', async () => {
+   it('waits beyond the provider cooldown before retrying a CAPTCHA', async () => {
       (fetch as any).mockResponses(
          ['', { status: 200, headers: { 'x-brd-error': 'redirect location was rejected' } }],
          [organic, { status: 200 }],
       );
       const promise = scrapeKeywordWithStrategy(keyword, settings);
-      await jest.advanceTimersByTimeAsync(6000);
+      await jest.advanceTimersByTimeAsync(14999);
+      expect((fetch as any).mock.calls).toHaveLength(1);
+      await jest.advanceTimersByTimeAsync(5001);
       expect((fetch as any).mock.calls).toHaveLength(2);
       const result = await promise;
       expect((result as any).error).toBeFalsy();
