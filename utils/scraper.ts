@@ -36,6 +36,18 @@ const PAGE_SIZE = 10;
 const PROVIDER_RETRY_DELAY = 5000;
 
 /**
+ * How long one scraper API call may take before it is abandoned.
+ *
+ * `fetch` has no deadline of its own. Measured 2026-09-14: a Bright Data call
+ * for "open air cinema" (US) logged START SCRAPE at 12:02:20 UTC and had still
+ * answered nothing at 12:13 — and since keywords are scraped one after the
+ * other, the 33 behind it were frozen with it. The nightly run would hang the
+ * same way, and nothing would say so. Two minutes is well past what the SERP
+ * API takes when it answers at all (a few seconds; ~40 s under retry).
+ */
+const scraperCallTimeout = (): number => parseInt(process.env.SCRAPER_TIMEOUT_MS || '', 10) || 120000;
+
+/**
  * Creates a SERP Scraper client promise based on the app settings.
  * @param {KeywordType} keyword - the keyword to get the SERP for.
  * @param {SettingsType} settings - the App Settings that contains the scraper details
@@ -104,7 +116,12 @@ export const getScraperClient = (
       // own method and body. Everything else keeps the historical plain GET.
       const method = scraper?.method || 'GET';
       const payload = method !== 'GET' && scraper?.body ? scraper.body(keyword, settings, pagination) : null;
-      client = fetch(apiURL, payload ? { method, headers, body: JSON.stringify(payload) } : { method, headers });
+      const deadline = new AbortController();
+      const timer = setTimeout(() => deadline.abort(), scraperCallTimeout());
+      const init = payload
+         ? { method, headers, body: JSON.stringify(payload), signal: deadline.signal }
+         : { method, headers, signal: deadline.signal };
+      client = fetch(apiURL, init).finally(() => clearTimeout(timer));
    }
 
    return client;
@@ -177,7 +194,10 @@ const attemptSinglePage = async (
       }
       return { results: [], error: `Empty response from ${scraperType || 'scraper'}` };
    } catch (error:any) {
-      const msg = error?.message || 'Unknown scraping error';
+      const abandoned = error?.name === 'AbortError' || error?.name === 'TimeoutError';
+      const msg = abandoned
+         ? `no answer from the scraper API after ${Math.round(scraperCallTimeout() / 1000)} s`
+         : (error?.message || 'Unknown scraping error');
       console.log('[ERROR] Scraping page', pagination.page, 'for keyword:', keyword.keyword, msg);
       return { results: [], error: msg };
    }
