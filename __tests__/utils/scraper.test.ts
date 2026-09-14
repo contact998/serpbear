@@ -1,4 +1,4 @@
-import { readScraperResponse, scrapeKeywordWithStrategy } from '../../utils/scraper';
+import { getSerp, readScraperResponse, scrapeKeywordWithStrategy } from '../../utils/scraper';
 import { dummyKeywords, dummySettings } from '../../__mocks__/data';
 import brightdata from '../../scrapers/services/brightdata';
 
@@ -184,5 +184,43 @@ describe('a cooldown refusal is waited out, not replayed', () => {
       expect((fetch as any).mock.calls).toHaveLength(2);
       const result = await promise;
       expect((result as any).error).toBeFalsy();
+   });
+});
+
+describe('brightdata extractor survives Google redirect links', () => {
+   // Shape measured on the live API 2026-09-14: Google hands out /goto tokens,
+   // Bright Data passes them through, but still names the site in display_link.
+   const organic = JSON.stringify([
+      { rank: 1, global_rank: 1, title: 'Écran gonflable pas cher', link: 'https://www.google.fr/goto?url=CAESawHrOz', display_link: 'https://hallucinecran.fr › ecran-gonflable-economique' },
+      { rank: 2, global_rank: 6, title: 'ASG34', link: 'https://asg34.com/catalogue/ecran-gonflable/', display_link: 'https://asg34.com › catalogue › ecran...' },
+      { rank: 3, global_rank: 7, title: 'AIRSCREEN', link: 'https://www.google.fr/goto?url=CAESUAHrOz', display_link: 'http://www.airscreen.fr' },
+      { rank: 4, global_rank: 8, title: 'Oray', link: 'https://www.google.fr/goto?url=CAESXgHr', display_link: 'https://oray.fr › les-ecrans › ...' },
+      { rank: 5, global_rank: 9, title: 'Sans display_link', link: 'https://www.google.co.uk/url?q=CAES' },
+   ]);
+   const extracted = brightdata.serpExtractor!(organic);
+
+   it('rebuilds the URL from display_link when link is a Google /goto redirect', () => {
+      expect(extracted[0].url).toBe('https://hallucinecran.fr/ecran-gonflable-economique');
+   });
+
+   it('keeps an absolute link untouched', () => {
+      expect(extracted[1].url).toBe('https://asg34.com/catalogue/ecran-gonflable/');
+   });
+
+   it('accepts a display_link that is only a host, and always says https', () => {
+      expect(extracted[2].url).toBe('https://www.airscreen.fr');
+   });
+
+   it('keeps only the host when Google elided the breadcrumb', () => {
+      expect(extracted[3].url).toBe('https://oray.fr');
+   });
+
+   it('leaves the redirect alone when the parser gives nothing better', () => {
+      expect(extracted[4].url).toBe('https://www.google.co.uk/url?q=CAES');
+   });
+
+   it('lets the tracked domain rank again', () => {
+      expect(getSerp('hallucinecran.fr', extracted).position).toBe(1);
+      expect(getSerp('airscreen.fr', extracted).position).toBe(7);
    });
 });
