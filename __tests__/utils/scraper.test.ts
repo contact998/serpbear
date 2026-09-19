@@ -241,7 +241,7 @@ describe('Bright Data social captions are not URLs', () => {
       const extracted = brightdata.serpExtractor!([
          { title: 'Ciné voiture', link: redirect, display_link: caption },
          { title: 'Hallucine', link: 'https://hallucinecran.fr/' },
-      ] as any, 'desktop');
+      ] as any);
       expect(extracted[0].url).toBe(redirect);
       expect(getSerp('hallucinecran.fr', extracted).position).toBe(2);
    });

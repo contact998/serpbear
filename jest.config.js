@@ -25,6 +25,8 @@ const customJestConfig = {
 // so the list has to be replaced after next/jest has built the config, not merged
 // into customJestConfig.
 const ESM_DEPENDENCIES = [
+  'rettime',
+  '@open-draft',
   'msw',
   '@mswjs',
   'until-async',
