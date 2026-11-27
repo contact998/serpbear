@@ -18,7 +18,7 @@ const DomainItem = ({ domain, selected, isConsoleIntegrated = false, thumb, upda
    const { keywordsUpdated, slug, keywordCount = 0, avgPosition = 0, scVisits = 0, scImpressions = 0, scPosition = 0 } = domain;
    // const router = useRouter();
    return (
-      <div className={`domItem bg-white border rounded w-full text-sm mb-10 hover:border-indigo-200 ${selected ? '' : ''}`}>
+      <div className={`domItem bg-white border rounded-sm w-full text-sm mb-10 hover:border-indigo-200 ${selected ? '' : ''}`}>
          <Link href={`/domain/${slug}`} className='flex flex-col lg:flex-row'>
             <div className={`flex-1 p-6 flex ${!isConsoleIntegrated ? 'basis-1/3' : ''}`}>
                <div className="group domain_thumb w-20 h-20 mr-6 bg-slate-100 rounded
@@ -49,7 +49,7 @@ const DomainItem = ({ domain, selected, isConsoleIntegrated = false, thumb, upda
                <div className=' bg-indigo-50 p-1 px-2 text-xs rounded-full absolute ml-3 mt-[-8px]'>
                   <Icon type="tracking" size={13} color="#364aff" /> Tracker
                </div>
-               <div className='dom_stats flex flex-1 font-semibold text-2xl p-4 pt-5 rounded border border-[#E9EBFF] text-center'>
+               <div className='dom_stats flex flex-1 font-semibold text-2xl p-4 pt-5 rounded-sm border border-[#E9EBFF] text-center'>
                   <div className="flex-1 relative">
                      <span className='block text-xs lg:text-sm text-gray-500 mb-1'>Keywords</span>{keywordCount}
                   </div>
@@ -63,7 +63,7 @@ const DomainItem = ({ domain, selected, isConsoleIntegrated = false, thumb, upda
                   <div className=' bg-indigo-50 p-1 px-2 text-xs rounded-full absolute ml-3 mt-[-8px]'>
                      <Icon type="google" size={13} /> Search Console (7d)
                   </div>
-                  <div className='dom_sc_stats flex flex-1 h-full font-semibold text-2xl p-4 pt-5 rounded border border-[#E9EBFF] text-center'>
+                  <div className='dom_sc_stats flex flex-1 h-full font-semibold text-2xl p-4 pt-5 rounded-sm border border-[#E9EBFF] text-center'>
                      <div className="flex-1 relative">
                         <span className='block text-xs lg:text-sm text-gray-500 mb-1'>Visits</span>
                         {new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(scVisits).replace('T', 'K')}

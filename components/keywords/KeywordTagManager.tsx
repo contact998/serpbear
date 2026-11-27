@@ -26,10 +26,10 @@ const KeywordTagManager = ({ keyword, allTags = [], closeModal }: keywordTagMana
             {keyword && keyword.tags.length > 0 && (
                <ul>
                   {keyword.tags.map((tag:string) => {
-                     return <li key={tag} className={'inline-block bg-slate-50 py-1 px-3 border rounded mr-4 mb-3 text-slate-500'}>
+                     return <li key={tag} className={'inline-block bg-slate-50 py-1 px-3 border rounded-sm mr-4 mb-3 text-slate-500'}>
                                  <Icon type="tags" size={14} classes="mr-2" />{tag}
                                  <button
-                                 className="ml-1 cursor-pointer rounded px-1 hover:bg-red-200 hover:text-red-700"
+                                 className="ml-1 cursor-pointer rounded-sm px-1 hover:bg-red-200 hover:text-red-700"
                                  onClick={() => removeTag(tag)}>
                                     <Icon type="close" size={14} />
                                  </button>
@@ -38,7 +38,7 @@ const KeywordTagManager = ({ keyword, allTags = [], closeModal }: keywordTagMana
                   <li className='inline-block py-1 px-1'>
                      <button
                      title='Add New Tag'
-                     className="cursor-pointer rounded p-1 px-3 bg-indigo-600 text-white font-semibold text-sm"
+                     className="cursor-pointer rounded-sm p-1 px-3 bg-indigo-600 text-white font-semibold text-sm"
                      onClick={() => setShowAddTag(true)}>+</button>
                   </li>
                </ul>

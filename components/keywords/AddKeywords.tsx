@@ -83,7 +83,7 @@ const AddKeywords = ({ closeModal, domain, keywords, scraperName = '', allowsCit
       }
    };
 
-   const deviceTabStyle = 'cursor-pointer px-2 py-2 rounded';
+   const deviceTabStyle = 'cursor-pointer px-2 py-2 rounded-sm';
 
    return (
       <Modal ref={ref} closeModal={() => { closeModal(false); }} title={'Add New Keywords'} width="[420px]">
@@ -91,7 +91,7 @@ const AddKeywords = ({ closeModal, domain, keywords, scraperName = '', allowsCit
             <div>
                <div>
                   <textarea
-                     className='w-full h-40 border rounded border-gray-200 p-4 outline-none focus:border-indigo-300'
+                     className='w-full h-40 border rounded-sm border-gray-200 p-4 outline-hidden focus:border-indigo-300'
                      placeholder="Type or Paste Keywords here. Insert Each keyword in a New line."
                      value={newKeywordsData.keywords}
                      onChange={(e) => setNewKeywordsData({ ...newKeywordsData, keywords: e.target.value })}>
@@ -131,7 +131,7 @@ const AddKeywords = ({ closeModal, domain, keywords, scraperName = '', allowsCit
                </div>
                <div className='relative'>
                   <input
-                     className='w-full border rounded border-gray-200 py-2 px-4 pl-12 outline-none focus:border-indigo-300'
+                     className='w-full border rounded-sm border-gray-200 py-2 px-4 pl-12 outline-hidden focus:border-indigo-300'
                      placeholder='Insert Tags (Optional)'
                      value={newKeywordsData.tags}
                      onChange={(e) => setNewKeywordsData({ ...newKeywordsData, tags: e.target.value })}
@@ -165,7 +165,7 @@ const AddKeywords = ({ closeModal, domain, keywords, scraperName = '', allowsCit
                <div className='relative mt-2'>
                   <input
                      className={`w-full border rounded border-gray-200 py-2 px-4 pl-8 
-                     outline-none focus:border-indigo-300 ${!allowsCity ? ' cursor-not-allowed' : ''} `}
+                     outline-hidden focus:border-indigo-300 ${!allowsCity ? ' cursor-not-allowed' : ''} `}
                      disabled={!allowsCity}
                      title={!allowsCity ? `Your scraper ${scraperName} doesn't have city level scraping feature.` : ''}
                      placeholder={`City (Optional)${!allowsCity ? `. Not available for ${scraperName}.` : ''}`}
@@ -178,12 +178,12 @@ const AddKeywords = ({ closeModal, domain, keywords, scraperName = '', allowsCit
             {error && <div className='w-full mt-4 p-3 text-sm bg-red-50 text-red-700'>{error}</div>}
             <div className='mt-6 text-right text-sm font-semibold flex justify-between'>
                <button
-                  className=' py-2 px-5 rounded cursor-pointer bg-indigo-50 text-slate-500 mr-3'
+                  className=' py-2 px-5 rounded-sm cursor-pointer bg-indigo-50 text-slate-500 mr-3'
                   onClick={() => closeModal(false)}>
                      Cancel
                </button>
                <button
-                  className=' py-2 px-5 rounded cursor-pointer bg-blue-700 text-white'
+                  className=' py-2 px-5 rounded-sm cursor-pointer bg-blue-700 text-white'
                   onClick={() => !isAdding && addKeywords()}>
                      {isAdding ? 'Adding....' : 'Add Keywords'}
                </button>

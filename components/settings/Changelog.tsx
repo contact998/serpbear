@@ -58,10 +58,10 @@ const ChangeLog = ({ closeChangeLog, ref }: ChangeLogProps) => {
                         return (
                            <div
                            key={version}
-                           className={`domKeywords bg-white rounded mb-6 border ${major ? ' border-indigo-400' : 'border-transparent'}`}>
+                           className={`domKeywords bg-white rounded-sm mb-6 border ${major ? ' border-indigo-400' : 'border-transparent'}`}>
                               <h4 className=' px-5 py-3 border-b border-b-gray-100 flex justify-between text-indigo-700 font-semibold'>
                                  <a href={`https://github.com/towfiqi/serpbear/releases/tag/${version}`}>
-                                    {version} {major && <span className=' text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded ml-2'>Major</span>}
+                                    {version} {major && <span className=' text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-sm ml-2'>Major</span>}
                                  </a>
                                  <span className=' text-sm text-gray-500'>
                                     <TimeAgo title={dayjs(date).format('DD-MMM-YYYY, hh:mm:ss A')} date={date} />

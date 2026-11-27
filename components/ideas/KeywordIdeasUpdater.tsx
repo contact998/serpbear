@@ -86,7 +86,7 @@ const KeywordIdeasUpdater = ({ onUpdate, settings, domain, searchConsoleConnecte
                      <div className={'mb-3'}>
                         <label className={labelStyle}>Get Ideas from given Keywords (Max 20)</label>
                         <textarea
-                        className='w-full border border-solid border-gray-300 focus:border-blue-100 p-3 rounded outline-none'
+                        className='w-full border border-solid border-gray-300 focus:border-blue-100 p-3 rounded-sm outline-hidden'
                         value={keywords}
                         onChange={(event) => setKeywords(event.target.value)}
                         placeholder="keyword1, keyword2.."

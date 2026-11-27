@@ -168,7 +168,7 @@ const IdeasKeywordsTable = ({
                   className='inline-block px-2 py-2 cursor-pointer hover:text-indigo-600'
                   onClick={() => addKeywordIdeasToTracker()}
                   >
-                     <span className=' text-white bg-blue-700 px-2 py-1 rounded font-semibold'>+ Add Keywords</span>
+                     <span className=' text-white bg-blue-700 px-2 py-1 rounded-sm font-semibold'>+ Add Keywords</span>
                   </a>
                </div>
             )}
@@ -191,7 +191,7 @@ const IdeasKeywordsTable = ({
                      <span className='domKeywords_head_keyword flex-1 basis-20 w-auto '>
                      {finalKeywords.length > 0 && (
                         <button
-                           className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px]  border border-slate-300 
+                           className={`p-0 mr-2 leading-0 inline-block rounded-xs pt-0 px-px pb-[3px]  border border-slate-300
                            ${selectedAllItems ? ' bg-blue-700 border-blue-700 text-white' : 'text-transparent'}`}
                            onClick={() => setSelectedKeywords(selectedAllItems ? [] : finalKeywords.map((k: IdeaKeyword) => k.uid))}
                            >

@@ -37,7 +37,7 @@ const ChartSlim = ({ labels, series, noMaxLimit = false, reverse = true }:ChartP
      },
    };
 
-   return <div className='w-[80px] h-[30px] rounded border border-gray-200'>
+   return <div className='w-[80px] h-[30px] rounded-sm border border-gray-200'>
          <Line
             datasetIdKey='XXX'
             options={options}

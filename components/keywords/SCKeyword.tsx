@@ -21,12 +21,12 @@ const SCKeyword = (props: SCKeywordProps) => {
       <div
       key={keyword}
       style={style}
-      className={`keyword relative py-5 px-4 text-gray-600 border-b-[1px] border-gray-200 lg:py-4 lg:px-6 lg:border-0 
+      className={`keyword relative py-5 px-4 text-gray-600 border-b border-gray-200 lg:py-4 lg:px-6 lg:border-0
       lg:flex lg:justify-between lg:items-center ${selected ? ' bg-indigo-50 keyword--selected' : ''} ${lastItem ? 'border-b-0' : ''}`}>
 
          <div className=' w-3/4 lg:flex-1 lg:basis-20 lg:w-auto font-semibold cursor-pointer'>
             <button
-               className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px] border 
+               className={`p-0 mr-2 leading-0 inline-block rounded-xs pt-0 px-px pb-[3px] border
                ${isTracked || selected ? ' bg-blue-700 border-blue-700 text-white' : 'text-transparent'}
                ${isTracked ? 'bg-gray-400 border-gray-400 cursor-default' : ''}`}
                onClick={() => !isTracked && selectKeyword(uid)}

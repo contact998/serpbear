@@ -54,7 +54,7 @@ const AddDomain = ({ closeModal, domains = [], ref }: AddDomainProps) => {
          <div data-testid="adddomain_modal">
             <h4 className='text-sm mt-4 pb-2'>Website URL(s)</h4>
             <textarea
-               className={`w-full h-40 border rounded border-gray-200 p-4 outline-none
+               className={`w-full h-40 border rounded border-gray-200 p-4 outline-hidden
                 focus:border-indigo-300 ${newDomainError ? ' border-red-400 focus:border-red-400' : ''}`}
                placeholder={'Type or Paste URLs here. Insert Each URL in a New line. eg: \nhttps://mysite.com/ \nhttps://anothersite.com/ '}
                value={newDomain}
@@ -63,8 +63,8 @@ const AddDomain = ({ closeModal, domains = [], ref }: AddDomainProps) => {
             </textarea>
             {newDomainError && <div><span className=' ml-2 block float-right text-red-500 text-xs font-semibold'>{newDomainError}</span></div>}
             <div className='mt-6 text-right text-sm font-semibold'>
-               <button className='py-2 px-5 rounded cursor-pointer bg-indigo-50 text-slate-500 mr-3' onClick={() => closeModal(false)}>Cancel</button>
-               <button className='py-2 px-5 rounded cursor-pointer bg-blue-700 text-white' onClick={() => !isAdding && addDomain() }>
+               <button className='py-2 px-5 rounded-sm cursor-pointer bg-indigo-50 text-slate-500 mr-3' onClick={() => closeModal(false)}>Cancel</button>
+               <button className='py-2 px-5 rounded-sm cursor-pointer bg-blue-700 text-white' onClick={() => !isAdding && addDomain() }>
                    {isAdding ? 'Adding....' : 'Add Domain'}
                </button>
             </div>

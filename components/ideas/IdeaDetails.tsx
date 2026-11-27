@@ -58,13 +58,13 @@ const IdeaDetails = ({ keyword, closeDetails }:IdeaDetailsProps) => {
    const keywordSearchResult = searchResultsFetched ? keywordSearchResultData?.searchResult?.results : dummySearchResults;
 
    return (
-       <div className="IdeaDetails fixed w-full h-screen top-0 left-0 z-[99999]" onClick={closeOnBGClick} data-testid="IdeaDetails">
+       <div className="IdeaDetails fixed w-full h-screen top-0 left-0 z-99999" onClick={closeOnBGClick} data-testid="IdeaDetails">
             <div className="IdeaDetails absolute w-full lg:w-5/12 bg-white customShadow top-0 right-0 h-screen" >
                <div className='IdeaDetails__header p-6 border-b border-b-slate-200 text-slate-500'>
                   <h3 className=' text-lg font-bold'>
                      <span title={countries[keyword.country][0]}
                      className={`fflag fflag-${keyword.country} w-[18px] h-[12px] mr-2`} /> {keyword.keyword}
-                     <span className='py-1 px-2 ml-2 rounded bg-blue-50 text-blue-700 text-xs font-bold'>
+                     <span className='py-1 px-2 ml-2 rounded-sm bg-blue-50 text-blue-700 text-xs font-bold'>
                         {formattedNum(keyword.avgMonthlySearches)}/month
                      </span>
                   </h3>
@@ -102,12 +102,12 @@ const IdeaDetails = ({ keyword, closeDetails }:IdeaDetailsProps) => {
                               <p>View Google Search Results for &quot;{keyword.keyword}&quot;</p>
                               <button
                               onClick={() => fetchKeywordSearchResults()}
-                              className='mt-4 text-sm font-semibold py-2 px-5 rounded cursor-pointer bg-blue-700 text-white '>
+                              className='mt-4 text-sm font-semibold py-2 px-5 rounded-sm cursor-pointer bg-blue-700 text-white '>
                                  <Icon type={fetchingResult ? 'loading' : 'google'} /> {fetchingResult ? 'Performing' : 'Perform'}  Google Search
                               </button>
                            </div>
                         )}
-                        <div className={`${!searchResultsFetched ? ' blur-sm ' : ''}`}>
+                        <div className={`${!searchResultsFetched ? ' blur-xs ' : ''}`}>
                            {keywordSearchResult && Array.isArray(keywordSearchResult) && keywordSearchResult.length > 0 && (
                               keywordSearchResult.map((item, index) => {
                                  const { position } = keyword;

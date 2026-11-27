@@ -84,30 +84,30 @@ const InsightStats = ({ stats = [], totalKeywords = 0, totalPages = 0 }:InsightS
       <div className='p-6 lg:border-t lg:border-gray-200'>
          <div className=' flex font-bold flex-wrap lg:flex-nowrap'>
             <div
-            className='flex-1 border border-gray-200 px-6 py-5 rounded mb-4 text-2xl text-violet-700 mr-5'
+            className='flex-1 border border-gray-200 px-6 py-5 rounded-sm mb-4 text-2xl text-violet-700 mr-5'
             title={`${formattedNum(totalStat.clicks || 0)} Visits`}>
                <span className=' block text-sm font-normal text-gray-500'>Visits</span>
                {new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(totalStat.clicks || 0).replace('T', 'K')}
             </div>
             <div
-            className='flex-1 border border-gray-200 px-6 py-5 rounded mb-4 text-2xl text-[#1fcdb0] lg:mr-5'
+            className='flex-1 border border-gray-200 px-6 py-5 rounded-sm mb-4 text-2xl text-[#1fcdb0] lg:mr-5'
             title={`${formattedNum(totalStat.impressions || 0)} Impressions`}>
                <span className=' block text-sm font-normal text-gray-500'>Impressions</span>
                {new Intl.NumberFormat('en-US', { notation: 'compact', compactDisplay: 'short' }).format(totalStat.impressions || 0).replace('T', 'K')}
             </div>
-            <div className='flex-1 border border-gray-200 px-6 py-5 rounded mb-4 text-2xl text-gray-500 font-semibold mr-5'>
+            <div className='flex-1 border border-gray-200 px-6 py-5 rounded-sm mb-4 text-2xl text-gray-500 font-semibold mr-5'>
                <span className=' block text-sm font-normal text-gray-500'>Avg Position</span>
                {(totalStat.position ? Math.round(totalStat.position / stats.length) : 0)}
             </div>
-            <div className='flex-1 border border-gray-200 px-6 py-5 rounded mb-4 text-2xl text-gray-500 font-semibold lg:mr-5'>
+            <div className='flex-1 border border-gray-200 px-6 py-5 rounded-sm mb-4 text-2xl text-gray-500 font-semibold lg:mr-5'>
                <span className=' block text-sm font-normal text-gray-500'>Avg CTR</span>
                {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalStat.ctr || 0)}%
             </div>
-            <div className='flex-1 border border-gray-200 px-6 py-5 rounded mb-4 text-2xl text-gray-500 font-semibold mr-5'>
+            <div className='flex-1 border border-gray-200 px-6 py-5 rounded-sm mb-4 text-2xl text-gray-500 font-semibold mr-5'>
                <span className=' block text-sm font-normal text-gray-500'>Keywords</span>
                {formattedNum(totalKeywords)}
             </div>
-            <div className='flex-1 border border-gray-200 px-6 py-5 rounded mb-4 text-2xl text-gray-500 font-semibold'>
+            <div className='flex-1 border border-gray-200 px-6 py-5 rounded-sm mb-4 text-2xl text-gray-500 font-semibold'>
                <span className=' block text-sm font-normal text-gray-500'>Pages</span>
                {formattedNum(totalPages)}
             </div>

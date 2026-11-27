@@ -66,7 +66,7 @@ const DomainSettings = ({ domain, closeModal, ref }: DomainSettingsProps) => {
    };
 
    const tabStyle = `inline-block px-4 py-2 rounded-md mr-3 cursor-pointer text-sm select-none z-10
-                     text-gray-600 border border-b-0 relative top-[1px] rounded-b-none`;
+                     text-gray-600 border border-b-0 relative top-px rounded-b-none`;
    const strategyOptions: SelectionOption[] = [
       { label: 'Use Global Setting', value: '' },
       { label: 'Basic (First page only — 10 results)', value: 'basic' },
@@ -125,7 +125,7 @@ const DomainSettings = ({ domain, closeModal, ref }: DomainSettingsProps) => {
                               search_console: { ...(domainSettings.search_console as DomainSearchConsole), property_type: updated[0] || 'domain' },
                            })}
                            multiple={false}
-                           rounded={'rounded'}
+                           rounded={'rounded-sm'}
                            />
                         </div>
                         {domainSettings?.search_console?.property_type === 'url' && (
@@ -156,7 +156,7 @@ const DomainSettings = ({ domain, closeModal, ref }: DomainSettingsProps) => {
                            <label className='mb-2 font-semibold block text-sm text-gray-700 capitalize w-full'>Search Console Private Key</label>
                            <textarea
                               className={`w-full p-2 border border-gray-200 rounded mb-3 text-xs 
-                              focus:outline-none h-[100px] focus:border-blue-200`}
+                              focus:outline-hidden h-[100px] focus:border-blue-200`}
                               value={domainSettings?.search_console?.private_key || ''}
                               placeholder={'-----BEGIN PRIVATE KEY-----/ssssaswdkihad....'}
                               onChange={(event) => setDomainSettings({
@@ -187,7 +187,7 @@ const DomainSettings = ({ domain, closeModal, ref }: DomainSettingsProps) => {
                                  setDomainSettings({ ...domainSettings, scrape_strategy: (updated[0] || '') as ScrapeStrategy | '' });
                               }}
                               multiple={false}
-                              rounded={'rounded'}
+                              rounded={'rounded-sm'}
                               minWidth={220}
                            />
                         </div>
@@ -202,7 +202,7 @@ const DomainSettings = ({ domain, closeModal, ref }: DomainSettingsProps) => {
                                     setDomainSettings({ ...domainSettings, scrape_pagination_limit: parseInt(updated[0] || '5', 10) });
                                  }}
                                  multiple={false}
-                                 rounded={'rounded'}
+                                 rounded={'rounded-sm'}
                                  minWidth={220}
                               />
                               <small className='text-gray-500 pt-2 block'>Each page returns up to 10 results.</small>
@@ -233,14 +233,14 @@ const DomainSettings = ({ domain, closeModal, ref }: DomainSettingsProps) => {
                )}
             </div>
 
-            <div className="flex justify-between border-t-[1px] border-gray-100 mt-8 pt-4 pb-0">
+            <div className="flex justify-between border-t border-gray-100 mt-8 pt-4 pb-0">
                <button
                className="text-sm font-semibold text-red-500"
                onClick={() => setShowRemoveDomain(true)}>
                   <Icon type="trash" /> Remove Domain
                </button>
                <button
-               className={`text-sm font-semibold py-2 px-5 rounded cursor-pointer bg-blue-700 text-white ${isUpdating ? 'cursor-not-allowed' : ''}`}
+               className={`text-sm font-semibold py-2 px-5 rounded-sm cursor-pointer bg-blue-700 text-white ${isUpdating ? 'cursor-not-allowed' : ''}`}
                onClick={() => !isUpdating && updateDomain()}>
                   {isUpdating && <Icon type='loading' />} Update Settings
                </button>
@@ -252,12 +252,12 @@ const DomainSettings = ({ domain, closeModal, ref }: DomainSettingsProps) => {
                   <p>Are you sure you want to remove this Domain? Removing this domain will remove all its keywords.</p>
                   <div className='mt-6 text-right font-semibold'>
                      <button
-                     className=' py-1 px-5 rounded cursor-pointer bg-indigo-50 text-slate-500 mr-3'
+                     className=' py-1 px-5 rounded-sm cursor-pointer bg-indigo-50 text-slate-500 mr-3'
                      onClick={() => setShowRemoveDomain(false)}>
                         Cancel
                      </button>
                      <button
-                     className=' py-1 px-5 rounded cursor-pointer bg-red-400 text-white'
+                     className=' py-1 px-5 rounded-sm cursor-pointer bg-red-400 text-white'
                      onClick={() => deleteMutate(domain)}>
                         Remove
 

@@ -72,7 +72,7 @@ const Research: NextPage = () => {
                   <div className={'mb-3'}>
                      <label className={labelStyle}>Generate Ideas from given Keywords (Max 20)</label>
                      <textarea
-                     className='w-full border border-solid border-gray-300 focus:border-blue-100 p-3 rounded outline-none text-sm'
+                     className='w-full border border-solid border-gray-300 focus:border-blue-100 p-3 rounded-sm outline-hidden text-sm'
                      value={seedKeywords}
                      onChange={(event) => setSeedKeywords(event.target.value)}
                      placeholder="keyword1, keyword2.."

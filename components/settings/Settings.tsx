@@ -93,7 +93,7 @@ const Settings = ({ closeSettings, ref }:SettingsProps) => {
    };
 
    const tabStyle = `inline-block px-3 py-2 rounded-md  cursor-pointer text-xs lg:text-sm lg:mr-3 lg:px-4 select-none z-10
-   text-gray-600 border border-b-0 relative top-[1px] rounded-b-none`;
+   text-gray-600 border border-b-0 relative top-px rounded-b-none`;
    const tabStyleActive = 'bg-white text-blue-600 border-slate-200';
 
    return (
@@ -143,10 +143,10 @@ const Settings = ({ closeSettings, ref }:SettingsProps) => {
                   closeSettings={closeSettings}
                    />
                )}
-               <div className=' border-t-[1px] border-gray-200 p-2 px-3'>
+               <div className=' border-t border-gray-200 p-2 px-3'>
                   <button
                   onClick={() => performUpdate()}
-                  className=' py-3 px-5 w-full rounded cursor-pointer bg-blue-700 text-white font-semibold text-sm'>
+                  className=' py-3 px-5 w-full rounded-sm cursor-pointer bg-blue-700 text-white font-semibold text-sm'>
                   {isUpdating && <Icon type="loading" size={14} />} Update Settings
                   </button>
                </div>
