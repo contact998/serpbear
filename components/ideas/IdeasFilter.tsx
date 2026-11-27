@@ -41,10 +41,10 @@ const IdeasFilters = (props: IdeasFilterProps) => {
 
    const deviceTabStyle = 'select-none cursor-pointer px-3 py-2 rounded-3xl mr-2';
    const deviceTabCountStyle = 'px-2 py-0 rounded-3xl bg-[#DEE1FC] text-[0.7rem] font-bold ml-1';
-   const mobileFilterOptionsStyle = 'visible mt-8 border absolute min-w-[0] rounded-lg max-h-96 bg-white z-50 w-52 right-2 p-4';
+   const mobileFilterOptionsStyle = 'visible mt-8 border absolute min-w-0 rounded-lg max-h-96 bg-white z-50 w-52 right-2 p-4';
 
    return (
-      <div className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b-[1px] lg:border-0 items-center'>
+      <div className='domKeywords_filters py-4 px-6 flex justify-between text-sm text-gray-500 font-semibold border-b lg:border-0 items-center'>
          <div>
             <ul className='flex text-xs'>
                <li
@@ -71,7 +71,7 @@ const IdeasFilters = (props: IdeasFilterProps) => {
                <div className=' lg:hidden'>
                   <button
                   data-testid="filter_button"
-                  className={`px-2 py-1 rounded ${filterOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
+                  className={`px-2 py-1 rounded-sm ${filterOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
                   title='Filter'
                   onClick={() => showFilterOptions(!filterOptions)}>
                      <Icon type="filter" size={18} />
@@ -94,7 +94,7 @@ const IdeasFilters = (props: IdeasFilterProps) => {
                      <input
                         data-testid="filter_input"
                         className={`border w-44 lg:w-36 focus:w-44 transition-all rounded-3xl 
-                        p-1.5 px-4 outline-none ring-0 focus:border-indigo-200`}
+                        p-1.5 px-4 outline-hidden ring-0 focus:border-indigo-200`}
                         type="text"
                         placeholder='Filter Keywords...'
                         onChange={searchKeywords}
@@ -105,7 +105,7 @@ const IdeasFilters = (props: IdeasFilterProps) => {
                <div className='relative'>
                   <button
                   data-testid="sort_button"
-                  className={`px-2 py-1 rounded ${sortOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
+                  className={`px-2 py-1 rounded-sm ${sortOptions ? ' bg-indigo-100 text-blue-700' : ''}`}
                   title='Sort'
                   onClick={() => showSortOptions(!sortOptions)}>
                      <Icon type="sort" size={18} />
@@ -113,8 +113,8 @@ const IdeasFilters = (props: IdeasFilterProps) => {
                   {sortOptions && (
                      <ul
                      data-testid="sort_options"
-                     className='sort_options mt-2 border absolute min-w-[0] right-0 rounded-lg
-                     max-h-96 bg-white z-[9999] w-44 overflow-y-auto styled-scrollbar'>
+                     className='sort_options mt-2 border absolute min-w-0 right-0 rounded-lg
+                     max-h-96 bg-white z-9999 w-44 overflow-y-auto styled-scrollbar'>
                         {sortOptionChoices.map((sortOption) => {
                            return <li
                                     key={sortOption.value}

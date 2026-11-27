@@ -20,7 +20,7 @@ const InsightItem = ({ item, lastItem, type, domain }:InsightItemProps) => {
 
    return (
       <div
-      className={`keyword relative py-5 px-4 text-gray-600 border-b-[1px] border-gray-200 lg:py-4 lg:px-6 lg:border-0 
+      className={`keyword relative py-5 px-4 text-gray-600 border-b border-gray-200 lg:py-4 lg:px-6 lg:border-0
       lg:flex lg:justify-between lg:items-center ${lastItem ? 'border-b-0' : ''}`}>
 
          <div className=' w-3/4 lg:flex-1 lg:basis-20 lg:w-auto font-semibold'>

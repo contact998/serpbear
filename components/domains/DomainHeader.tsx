@@ -30,7 +30,7 @@ const DomainHeader = (
    const daysName = (dayKey:string) => dayKey.replace('three', '3').replace('seven', '7').replace('thirty', '30').replace('Days', ' Days');
    const buttonStyle = 'leading-6 inline-block px-2 py-2 text-gray-500 hover:text-gray-700';
    const buttonLabelStyle = 'ml-2 text-sm not-italic lg:invisible lg:opacity-0';
-   const tabStyle = 'rounded rounded-b-none cursor-pointer border-[#e9ebff] border-b-0';
+   const tabStyle = 'rounded-sm rounded-b-none cursor-pointer border-[#e9ebff] border-b-0';
    const scDataFilterStlye = 'px-3 py-2 block w-full';
    return (
       <div className='domain_keywords_head w-full '>
@@ -45,7 +45,7 @@ const DomainHeader = (
                defaultLabel="Select Domain"
                updateField={(updateSlug:[string]) => updateSlug && updateSlug[0] && router.push(`${updateSlug[0]}`)}
                multiple={false}
-               rounded={'rounded'}
+               rounded={'rounded-sm'}
                />
             </div>
          </div>
@@ -136,7 +136,7 @@ const DomainHeader = (
                      <Icon type='date' size={13} classes="mr-1" /> {daysName(scFilter)}
                   </span>
                   {ShowSCDates && (
-                     <div className='absolute w-24 z-50 mt-0 right-0 bg-white border border-gray-200 rounded text-center'>
+                     <div className='absolute w-24 z-50 mt-0 right-0 bg-white border border-gray-200 rounded-sm text-center'>
                         {['threeDays', 'sevenDays', 'thirtyDays'].map((itemKey) => {
                            return <button
                                     key={itemKey}

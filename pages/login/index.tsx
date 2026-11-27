@@ -58,7 +58,7 @@ const Login: NextPage = () => {
 
    const labelStyle = 'mb-2 font-semibold inline-block text-sm text-gray-700';
    // eslint-disable-next-line max-len
-   const inputStyle = 'w-full p-2 border border-gray-200 rounded mb-3 focus:outline-none focus:border-blue-200';
+   const inputStyle = 'w-full p-2 border border-gray-200 rounded-sm mb-3 focus:outline-hidden focus:border-blue-200';
    const errorBorderStyle = 'border-red-400 focus:border-red-400';
    return (
       <div className={'Login'}>
@@ -99,12 +99,12 @@ const Login: NextPage = () => {
                   </div>
                   <button
                   onClick={() => loginuser()}
-                  className={'py-3 px-5 w-full rounded cursor-pointer bg-blue-700 text-white font-semibold text-sm'}>
+                  className={'py-3 px-5 w-full rounded-sm cursor-pointer bg-blue-700 text-white font-semibold text-sm'}>
                      Login
                   </button>
                   {error && error.msg
                   && <div
-                     className={'absolute w-full bottom-[-100px] ml-[-20px] rounded text-center p-3 bg-red-100 text-red-600 text-sm font-semibold'}>
+                     className={'absolute w-full bottom-[-100px] ml-[-20px] rounded-sm text-center p-3 bg-red-100 text-red-600 text-sm font-semibold'}>
                         {error.msg}
                      </div>
                   }

@@ -53,7 +53,7 @@ const SCInsight = ({ insight, isLoading = true, isConsoleIntegrated = true, doma
       <div>
          <div className='domKeywords flex flex-col bg-[white] rounded-md text-sm border mb-5'>
             <div className='domKeywords_filters py-4 px-6 flex flex-col justify-between
-            text-sm text-gray-500 font-semibold border-b-[1px] lg:border-0 lg:flex-row'>
+            text-sm text-gray-500 font-semibold border-b lg:border-0 lg:flex-row'>
                <div>
                   <ul className='text-xs hidden lg:flex'>
                      {['stats', 'keywords', 'countries', 'pages'].map((tabItem) => {
@@ -78,7 +78,7 @@ const SCInsight = ({ insight, isLoading = true, isConsoleIntegrated = true, doma
                      defaultLabel="Select Tab"
                      updateField={(updatedTab:[string]) => switchTab(updatedTab[0])}
                      multiple={false}
-                     rounded={'rounded'}
+                     rounded={'rounded-sm'}
                      />
                   </div>
                </div>

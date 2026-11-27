@@ -42,7 +42,7 @@ const AddTags = ({ keywords = [], existingTags = [], closeModal }: AddTagsProps)
             </span>
             <input
                ref={inputRef}
-               className='w-full border rounded border-gray-200 py-3 px-4 pl-12 outline-none focus:border-indigo-300'
+               className='w-full border rounded-sm border-gray-200 py-3 px-4 pl-12 outline-hidden focus:border-indigo-300'
                placeholder='Insert Tags. eg: tag1, tag2'
                value={tagInput}
                onChange={(e) => setTagInput(e.target.value)}
@@ -75,7 +75,7 @@ const AddTags = ({ keywords = [], existingTags = [], closeModal }: AddTagsProps)
             )}
 
             <button
-            className=" absolute right-2 top-2 cursor-pointer rounded p-2 px-4 bg-indigo-600 text-white font-semibold text-sm"
+            className=" absolute right-2 top-2 cursor-pointer rounded-sm p-2 px-4 bg-indigo-600 text-white font-semibold text-sm"
             onClick={addTag}>
                Apply
             </button>

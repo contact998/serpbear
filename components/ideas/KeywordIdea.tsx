@@ -32,12 +32,12 @@ const KeywordIdea = (props: KeywordIdeaProps) => {
       <div
       key={keyword}
       style={style}
-      className={`keyword relative py-5 px-4 text-gray-600 border-b-[1px] border-gray-200 lg:py-4 lg:px-6 lg:border-0 
+      className={`keyword relative py-5 px-4 text-gray-600 border-b border-gray-200 lg:py-4 lg:px-6 lg:border-0
       lg:flex lg:justify-between lg:items-center ${selected ? ' bg-indigo-50 keyword--selected' : ''} ${lastItem ? 'border-b-0' : ''}`}>
 
          <div className=' w-3/4 lg:flex-1 lg:basis-20 lg:w-auto font-semibold cursor-pointer'>
             <button
-               className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px] border 
+               className={`p-0 mr-2 leading-0 inline-block rounded-xs pt-0 px-px pb-[3px] border
                ${selected ? ' bg-blue-700 border-blue-700 text-white' : 'text-transparent'}`}
                onClick={() => selectKeyword(uid)}
                >
@@ -65,7 +65,7 @@ const KeywordIdea = (props: KeywordIdeaProps) => {
          </div>
 
          <div className='keyword_ctr text-center inline-block ml-4 lg:flex mt-4 relative lg:flex-1 lg:m-0 justify-center'>
-            <div className={`idea_competiton idea_competiton--${competition} flex bg-slate-100 rounded w-28 text-xs font-semibold`}>
+            <div className={`idea_competiton idea_competiton--${competition} flex bg-slate-100 rounded-sm w-28 text-xs font-semibold`}>
                <span className=' inline-block p-1 flex-1'>{competitionIndex}/100</span>
                <span className=' inline-block p-1 flex-1 rounded-e text-white'>{competition}</span>
             </div>

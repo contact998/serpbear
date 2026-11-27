@@ -94,12 +94,12 @@ const Keyword = (props: KeywordProps) => {
       <div
       key={keyword + ID}
       style={style}
-      className={`keyword relative py-5 px-4 text-gray-600 border-b-[1px] border-gray-200 lg:py-4 lg:px-6 lg:border-0 
+      className={`keyword relative py-5 px-4 text-gray-600 border-b border-gray-200 lg:py-4 lg:px-6 lg:border-0
       lg:flex lg:justify-between lg:items-center ${selected ? ' bg-indigo-50 keyword--selected' : ''} ${lastItem ? 'border-b-0' : ''}`}>
 
          <div className=' w-3/4 font-semibold cursor-pointer lg:flex-1 lg:shrink-0 lg:basis-28 lg:w-auto lg:flex lg:items-center'>
             <button
-               className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px] border 
+               className={`p-0 mr-2 leading-0 inline-block rounded-xs pt-0 px-px pb-[3px] border
                ${selected ? ' bg-blue-700 border-blue-700 text-white' : 'text-transparent'}`}
                onClick={() => selectKeyword(ID)}
                >
@@ -195,36 +195,36 @@ const Keyword = (props: KeywordProps) => {
 
          <div className='absolute right-4 mt-[-10px] top-2 lg:flex-1 lg:basis-5 lg:grow-0 lg:shrink-0 lg:relative lg:right-[-10px]'>
             <button
-            className={`keyword_dots rounded px-1 text-indigo-300 hover:bg-indigo-50 ${showOptions ? 'bg-indigo-50 text-indigo-600 ' : ''}`}
+            className={`keyword_dots rounded-sm px-1 text-indigo-300 hover:bg-indigo-50 ${showOptions ? 'bg-indigo-50 text-indigo-600 ' : ''}`}
             onClick={() => setShowOptions(!showOptions)}>
                <Icon type="dots" size={20} />
             </button>
             {showOptions && (
-               <ul className='keyword_options customShadow absolute w-[180px] right-0 bg-white rounded border z-20'>
+               <ul className='keyword_options customShadow absolute w-[180px] right-0 bg-white rounded-sm border z-20'>
                   <li>
                      <a className={optionsButtonStyle} onClick={() => { refreshkeyword([ID]); setShowOptions(false); }}>
-                     <span className=' bg-indigo-100 text-blue-700 px-1 rounded'><Icon type="reload" size={11} /></span> Refresh Keyword</a>
+                     <span className=' bg-indigo-100 text-blue-700 px-1 rounded-sm'><Icon type="reload" size={11} /></span> Refresh Keyword</a>
                   </li>
                   <li>
                      <a className={optionsButtonStyle}
                      onClick={() => { favoriteKeyword({ keywordID: ID, sticky: !sticky }); setShowOptions(false); }}>
-                        <span className=' bg-yellow-300/30 text-yellow-500 px-1 rounded'>
+                        <span className=' bg-yellow-300/30 text-yellow-500 px-1 rounded-sm'>
                            <Icon type="star" size={14} />
                         </span> { sticky ? 'Unfavorite Keyword' : 'Favorite Keyword'}
                      </a>
                   </li>
                   <li><a className={optionsButtonStyle} onClick={() => { manageTags(); setShowOptions(false); }}>
-                     <span className=' bg-green-100 text-green-500 px-1 rounded'><Icon type="tags" size={14} /></span> Add/Edit Tags</a>
+                     <span className=' bg-green-100 text-green-500 px-1 rounded-sm'><Icon type="tags" size={14} /></span> Add/Edit Tags</a>
                   </li>
                   <li><a className={optionsButtonStyle} onClick={() => { removeKeyword([ID]); setShowOptions(false); }}>
-                     <span className=' bg-red-100 text-red-600 px-1 rounded'><Icon type="trash" size={14} /></span> Remove Keyword</a>
+                     <span className=' bg-red-100 text-red-600 px-1 rounded-sm'><Icon type="trash" size={14} /></span> Remove Keyword</a>
                   </li>
                </ul>
             )}
          </div>
 
          {lastUpdateError && lastUpdateError.date && showPositionError && (
-            <div className={`absolute p-2 bg-white z-30 border border-red-200 rounded w-[220px] left-4 shadow-sm text-xs 
+            <div className={`absolute p-2 bg-white z-30 border border-red-200 rounded w-[220px] left-4 shadow-xs text-xs
             ${index > 2 ? 'lg:bottom-12 mt-[-70px]' : ' top-12'}`}>
                Error Updating Keyword position (Tried <TimeAgo
                                                          title={dayjs(lastUpdateError.date).format('DD-MMM-YYYY, hh:mm:ss A')}
@@ -232,7 +232,7 @@ const Keyword = (props: KeywordProps) => {
                <i className='absolute top-0 right-0 ml-2 p-2 font-semibold not-italic cursor-pointer' onClick={() => setPositionError(false)}>
                   <Icon type="close" size={16} color="#999" />
                </i>
-               <div className=' border-t-[1px] border-red-100 mt-2 pt-1'>
+               <div className=' border-t border-red-100 mt-2 pt-1'>
                   {lastUpdateError.scraper && <strong className='capitalize'>{lastUpdateError.scraper}: </strong>}{lastUpdateError.error}
                </div>
             </div>

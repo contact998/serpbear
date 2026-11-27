@@ -22,7 +22,7 @@ const SecretField = ({ label = '', value = '', placeholder = '', onChange, hasEr
             <Icon type={showValue ? 'eye-closed' : 'eye'} size={18} />
          </span>
          <input
-            className={`w-[210px] p-2 border border-gray-200 rounded focus:outline-none 
+            className={`w-[210px] p-2 border border-gray-200 rounded focus:outline-hidden
              focus:border-blue-200 ${hasError ? ' border-red-400 focus:border-red-400' : ''} `}
             type={showValue ? 'text' : 'password'}
             value={value}

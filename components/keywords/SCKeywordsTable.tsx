@@ -125,7 +125,7 @@ const SCKeywordsTable = ({ domain, keywords = [], isLoading = true, isConsoleInt
                         className='block px-2 py-2 cursor-pointer hover:text-indigo-600'
                         onClick={() => addSCKeywordsToTracker()}
                         >
-                           <span className=' bg-indigo-100 text-blue-700 px-1 rounded font-black'>+</span> Add Keywords to Tracker
+                           <span className=' bg-indigo-100 text-blue-700 px-1 rounded-sm font-black'>+</span> Add Keywords to Tracker
                         </a>
                      </li>
                   </ul>
@@ -153,7 +153,7 @@ const SCKeywordsTable = ({ domain, keywords = [], isLoading = true, isConsoleInt
                      <span className='domKeywords_head_keyword flex-1 basis-20 w-auto '>
                      {finalKeywords[device].length > 0 && (
                         <button
-                           className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px]  border border-slate-300 
+                           className={`p-0 mr-2 leading-0 inline-block rounded-xs pt-0 px-px pb-[3px]  border border-slate-300
                            ${selectedAllItems ? ' bg-blue-700 border-blue-700 text-white' : 'text-transparent'}`}
                            onClick={() => setSelectedKeywords(selectedAllItems ? [] : finalKeywords[device].map((k: SearchAnalyticsItem) => k.uid))}
                            >

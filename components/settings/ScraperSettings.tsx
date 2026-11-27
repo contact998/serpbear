@@ -60,7 +60,7 @@ const ScraperSettings = ({ settings, settingsError, updateSettings }:ScraperSett
             defaultLabel="Select Scraper"
             updateField={(updatedTime:[string]) => updateSettings('scraper_type', updatedTime[0])}
             multiple={false}
-            rounded={'rounded'}
+            rounded={'rounded-sm'}
             minWidth={220}
             />
          </div>
@@ -80,7 +80,7 @@ const ScraperSettings = ({ settings, settingsError, updateSettings }:ScraperSett
                <label className={labelStyle}>Proxy List</label>
                <textarea
                   className={`w-full p-2 border border-gray-200 rounded mb-3 text-xs 
-                  focus:outline-none min-h-[160px] focus:border-blue-200 
+                  focus:outline-hidden min-h-[160px] focus:border-blue-200
                   ${settingsError?.type === 'no_email' ? ' border-red-400 focus:border-red-400' : ''} `}
                   value={settings?.proxy}
                   placeholder={'http://122.123.22.45:5049\nhttps://user:password@122.123.22.45:5049'}
@@ -134,7 +134,7 @@ const ScraperSettings = ({ settings, settingsError, updateSettings }:ScraperSett
                      defaultLabel="Select Strategy"
                      updateField={(updated:string[]) => updated[0] && updateSettings('scrape_strategy', updated[0])}
                      multiple={false}
-                     rounded={'rounded'}
+                     rounded={'rounded-sm'}
                      minWidth={220}
                   />
                   <small className='text-gray-500 pt-2 block'>
@@ -154,7 +154,7 @@ const ScraperSettings = ({ settings, settingsError, updateSettings }:ScraperSett
                      defaultLabel="Select Page Count"
                      updateField={(updated:string[]) => updated[0] && updateSettings('scrape_pagination_limit', parseInt(updated[0], 10))}
                      multiple={false}
-                     rounded={'rounded'}
+                     rounded={'rounded-sm'}
                      minWidth={220}
                   />
                   <small className='text-gray-500 pt-2 block'>Each page returns up to 10 results. 5 pages = top 50 results checked.</small>

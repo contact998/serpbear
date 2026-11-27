@@ -92,7 +92,7 @@ const SelectField = (props: SelectFieldProps) => {
                {options.length > 20 && (
                   <div className=''>
                      <input
-                     className=' border-b-[1px] p-3 w-full focus:outline-0 focus:border-blue-100'
+                     className=' border-b p-3 w-full focus:outline-0 focus:border-blue-100'
                      type="text"
                      placeholder='Search..'
                      onChange={filterOptions}
@@ -112,7 +112,7 @@ const SelectField = (props: SelectFieldProps) => {
                         >
                            {multiple && (
                               <span
-                                 className={`p-0 mr-2 leading-[0px] inline-block rounded-sm pt-0 px-[1px] pb-[3px] border text-sm
+                                 className={`p-0 mr-2 leading-0 inline-block rounded-xs pt-0 px-px pb-[3px] border text-sm
                                  ${itemActive ? ' bg-indigo-600 border-indigo-600 text-white' : 'text-transparent'}`} >
                                  <Icon type="check" size={10} />
                               </span>

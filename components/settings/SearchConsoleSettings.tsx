@@ -34,7 +34,7 @@ const SearchConsoleSettings = ({ settings, settingsError, updateSettings }:Searc
             <label className='mb-2 font-semibold block text-sm text-gray-700 capitalize w-full'>Search Console Private Key</label>
             <textarea
                className={`w-full p-2 border border-gray-200 rounded mb-3 text-xs 
-               focus:outline-none h-[100px] focus:border-blue-200`}
+               focus:outline-hidden h-[100px] focus:border-blue-200`}
                value={settings.search_console_private_key}
                placeholder={'-----BEGIN PRIVATE KEY-----/ssssaswdkihad....'}
                onChange={(event) => updateSettings('search_console_private_key', event.target.value)}

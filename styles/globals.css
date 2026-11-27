@@ -1,8 +1,24 @@
-@import url("./fflag.css");
-@import url("./changelog.css");
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('./fflag.css') layer(base);
+@import url('./changelog.css') layer(base);
+@import 'tailwindcss' source(none);
+@source '../pages';
+@source '../components';
+@source inline('max-h-48 w-[150px] w-[240px] min-w-[270px] min-w-[180px] max-w-[180px]');
+
+/* Keep the Tailwind 3 defaults for elements without explicit utilities. */
+@layer base {
+   *, ::after, ::before, ::backdrop, ::file-selector-button {
+      border-color: var(--color-gray-200, currentColor);
+   }
+
+   input::placeholder, textarea::placeholder {
+      color: var(--color-gray-400);
+   }
+
+   button:not(:disabled), [role="button"]:not(:disabled) {
+      cursor: pointer;
+   }
+}
 
 body {
    background-color: #f8f9ff;
@@ -14,10 +30,12 @@ body {
 
 .text-sm {
    font-size: 0.80rem;
+   line-height: 1.25rem;
 }
 @media (min-width: 1024px) {
    .lg\:text-sm {
       font-size: 0.80rem;
+      line-height: 1.25rem;
    }
 }
 
