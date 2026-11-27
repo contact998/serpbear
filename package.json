@@ -37,7 +37,7 @@
     "isomorphic-fetch": "^3.0.0",
     "jsonwebtoken": "^9.0.3",
     "next": "^16.3.5",
-    "nodemailer": "^9.1.1",
+    "nodemailer": "^10.1.4",
     "react": "19.3.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "19.3.0",
